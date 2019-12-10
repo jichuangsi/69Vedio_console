@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>69短视频</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="__ROOT__/tpl/default/app/static/js/reset.js"></script>
+    <script type="text/javascript" src="__ROOT__/tpl/default/app/static/js/equipInfo.js"></script>
+    <script type="text/javascript" src="__ROOT__/tpl/default/static/js/jquery-3.2.1.min.js"></script>
+  	<script type="text/javascript" src="__ROOT__/tpl/default/static/js/layer/layer.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .box {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.2rem;
+        }
+        .box .img {
+            width: 1.36rem;
+            height: 1.36rem;
+            margin-right: 0.2rem;
+        }
+        .box .img img {
+            width: 100%;
+        }
+        .center {
+            flex: 1;
+            font-size: 0.36rem;
+        }
+        .center img{
+            width: 0.26rem;
+        }
+        .center span {
+            font-size: 0.22rem;
+        }
+        .btn {
+            font-size: 0.32rem;
+            color: #fff;
+            width: 2rem;
+            height: 0.88rem;
+            line-height: 0.88rem;
+            text-align: center;
+            background-color: #ff3841;
+            border-radius: 0.88rem;
+        }
+    </style>
+    <script type="text/javascript">
+    var did;
+    $(function(){
+    	let a = u();
+        /* console.log('sw:' + window.screen.width);
+        console.log('sh:' + window.screen.height);
+        console.log('sp:' + window.devicePixelRatio);
+        console.log('gv:' + a.version);
+        console.log('gr:' + a.renderer); */
+
+        var data = {
+          sw: c("" + (window.screen.width || 0)),//设备屏幕宽度
+          sh: c("" + (window.screen.height || 0)),//设备屏幕高度
+          sp: window.devicePixelRatio,//设备像素比
+          gv: c(a.version || ""),//设备显卡版本
+          gr: c(a.renderer || ""),//设备显卡渲染器
+          uid: '{$u}',//邀请人uid
+          code: '{$c}',//邀请码
+        }
+        //console.log(data);
+        
+        $.post('/Userservice/initDevice',data,function (e) {
+        	if(e.resultCode==0){
+        		did = e.data.did;
+        		//layer.msg(e.message, {icon: 6});
+        		//closeWindow();
+        		//$('.btn').disable = true;
+        	}else{
+        		layer.msg('线路繁忙，请稍后再试！', {icon: 5});
+        		$('.btn').disable = true;
+        	}
+        },'json');
+    });
+    
+    function getApp(){
+    	window.location.href = '/app/getApp/d/'+did;
+    }
+    
+    </script>
+</head>
+<body>
+    <div class="box">
+        <div class="img">
+            <img src="__ROOT__/tpl/default/app/static/images/logo.png" alt="">
+        </div>
+        <div class="center">
+            <div class="title">69短视频</div>
+            <div>
+                <img src="__ROOT__/tpl/default/app/static/images/start.png" alt="">
+                <img src="__ROOT__/tpl/default/app/static/images/start.png" alt="">
+                <img src="__ROOT__/tpl/default/app/static/images/start.png" alt="">
+                <img src="__ROOT__/tpl/default/app/static/images/start.png" alt="">
+                <img src="__ROOT__/tpl/default/app/static/images/start.png" alt="">
+                <span>(565656)</span>
+            </div>
+        </div>
+        <div class="btn" onclick="getApp()">打开看看</div>
+    </div>
+</body>
+</html>

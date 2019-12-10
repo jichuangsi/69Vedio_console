@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>fingerprintjs</title>
+  <style type="text/css">
+    body{
+      font-family: 'Sans'
+    }
+  </style>
+  <!-- <script src="fingerprint.js"></script> -->
+  <script type="text/javascript" src="__ROOT__/tpl/default/test/fingerprint.js"></script>
+  <script type="text/javascript" id="_openinstall_banner" src="__ROOT__/tpl/default/test/openinstall.js?id=877059627466572187"></script>
+  <!-- <script type="text/javascript" id="_openinstall_banner" src="//openinstall.io/openinstall.js?id=877059627466572187"></script> -->
+</head>
+<body>
+  <div style="text-align: center;">
+    <h3 style="margin-top: 60px">Your browser fingerprint with default settings (canvas, screen resolutin, activeX disabled)</h3>
+    <h1 id="fp1"></h1>
+  </div>
+  <div style="text-align: center;">
+    <h3 style="margin-top: 20px">Your browser fingerprint with canvas enabled is:</h3>
+    <h1 id="fp2"></h1>
+  </div>
+  <div style="text-align: center;">
+      <h3 style="margin-top: 20px">Your browser fingerprint with ie_activex enabled is:</h3>
+      <h1 id="fp3"></h1>
+  </div>
+  <div style="text-align: center;">
+    <h3 style="margin-top: 20px">Your browser fingerprint with screen_resolution enabled is:</h3>
+    <h1 id="fp4"></h1>
+  </div>
+  
+  sw<h1 id="sw"></h1>
+  sh<h1 id="sh"></h1>
+  sp<h1 id="sp"></h1>
+  gv<h1 id="gv"></h1>
+  gr<h1 id="gr"></h1>
+  
+  
+  <button id="downloadButton">下载</button>
+  <script>
+	//openinstall初始化时将与openinstall服务器交互，应尽可能早的调用
+	  /*web页面向app传递的json数据(json string/js Object)，应用被拉起或是首次安装时，通过相应的android/ios api可以获取此数据*/
+	  var data = OpenInstall.parseUrlParams();//openinstall.js中提供的工具函数，解析url中的所有查询参数
+	  new OpenInstall({
+	      /*appKey必选参数，openinstall平台为每个应用分配的ID*/
+	      appKey : "csldko",
+	      /*可选参数，自定义android平台的apk下载文件名；个别andriod浏览器下载时，中文文件名显示乱码，请慎用中文文件名！*/
+	      //apkFileName : 'com.fm.openinstalldemo-v2.2.0.apk',
+	      /*可选参数，是否优先考虑拉起app，以牺牲下载体验为代价*/
+	      //preferWakeup:true,
+	      /*自定义遮罩的html*/
+	      //mask:function(){
+	      //  return "<div id='openinstall_shadow' style='position:fixed;left:0;top:0;background:rgba(0,255,0,0.5);filter:alpha(opacity=50);width:100%;height:100%;z-index:10000;'></div>"
+	      //},
+	      /*openinstall初始化完成的回调函数，可选*/
+	      onready : function() {
+	          var m = this, button = document.getElementById("downloadButton");
+	          button.style.visibility = "visible";
+	
+	          /*在app已安装的情况尝试拉起app*/
+	          m.schemeWakeup();
+	          /*用户点击某个按钮时(假定按钮id为downloadButton)，安装app*/
+	          button.onclick = function() {
+	              m.wakeupOrInstall();
+	              return false;
+	          }
+	      }
+	  }, data);
+
+  
+  
+  
+  
+  
+  
+  
+  
+    var fp1 = new Fingerprint();
+    var fp2 = new Fingerprint({canvas: true});
+    var fp3 = new Fingerprint({ie_activex: true});
+    var fp4 = new Fingerprint({screen_resolution: true});
+    document.getElementById('fp1').innerHTML = fp1.get();
+    document.getElementById('fp2').innerHTML = fp2.get();
+    document.getElementById('fp3').innerHTML = fp3.get();
+    document.getElementById('fp4').innerHTML = fp4.get();
+        
+    function submitFingerprint(){
+    	window.location.href = '/test/download/f/'+fp1.get()+'/c/{$code}';
+    }
+    
+	/* setCookie('fingerprint',fp1.get());	
+	alert(getCookie('fingerprint'));	
+	function setCookie(name, value) {
+		var Days = 30;
+		var exp = new Date();
+		exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+		document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+	}
+
+			function getCookie(name) {
+                var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+
+                if (arr = document.cookie.match(reg)) return unescape(arr[2]);
+                else return null;
+            } */
+
+  </script>
+</body>
+</html>

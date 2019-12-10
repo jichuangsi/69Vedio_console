@@ -1,0 +1,11 @@
+.idea
+composer.lock
+*.log
+thinkphp
+vendor
+houtai/vendor
+.buildpath
+.project
+.settings
+runtime
+houtai/runtime
