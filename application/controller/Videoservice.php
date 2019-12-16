@@ -34,6 +34,8 @@ class Videoservice extends Controller
     
     private $authHeaders = ['multipart/form-data'];
     
+    private $default_app_avatar = '/tpl/default/app/static/images/logo.png';
+    
     private $default_user_avatar = '/tpl/default/app/static/images/logo.png';
     
     public function __construct(Request $request)
@@ -92,7 +94,7 @@ class Videoservice extends Controller
         $class = $request->post('class');
         $img = $request->file('fileimg');
         $video = $request->file('filevideo'); 
-       
+        
         unset($videoData);
         $videoData['title'] = $title;
         $videoData['accept'] = $accept;
@@ -153,7 +155,7 @@ class Videoservice extends Controller
         
         unset($videoData['accept']);
         if($gold) $videoData['gold'] = $gold;
-        if($tags) $videoData['tag'] = implode(",", $tags);
+        if($tags) $videoData['tag'] = $tags;//implode(",", $tags);
         else $videoData['tag'] = 0;
         if($class) $videoData['class'] = $class;
         else $videoData['class'] = 0;
@@ -373,7 +375,7 @@ class Videoservice extends Controller
         
         $query->name('video')->alias('v')
                 ->field('v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.headimgurl')
-                ->join('member m','v.user_id = m.id');
+                ->join('member m','v.user_id = m.id','LEFT');
         
         if(isset($param['where'])&&!empty($param['where'])){
             $query->where($param['where']);
@@ -401,7 +403,14 @@ class Videoservice extends Controller
         foreach($videos as &$v){
             $v['url'] = $this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
             $v['thumbnail'] = $this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
-            if(!$v['headimgurl']) $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+            if($v['user_id']===0){
+                $v['username'] = '69官方';
+                $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
+            }else{
+                if(!$v['headimgurl']) $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                else $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].str_replace('\\','/',$v['headimgurl']);
+                if(!$v['username']) $v['username'] = '未知用户';
+            }            
             
             array_push($returnData['videos'], $v);
         }
