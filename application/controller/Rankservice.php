@@ -30,7 +30,7 @@ class Rankservice extends Controller
     
     private $default_app_avatar = '/tpl/default/app/static/images/logo.png';
     
-    private $default_user_avatar = '/tpl/default/app/static/images/logo.png';
+    private $default_user_avatar = '/tpl/default/app/static/images/user.png';
     
     //private $authHeaders = ['multipart/form-data'];
     
