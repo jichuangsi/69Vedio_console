@@ -34,6 +34,8 @@ class Videoservice extends Controller
     
     private $authHeaders = ['multipart/form-data'];
     
+    private $default_user_avatar = '/tpl/default/app/static/images/logo.png';
+    
     public function __construct(Request $request)
     {
         //$origin=$request->header('origin'); //"http://sp.msvodx.com"
@@ -45,7 +47,7 @@ class Videoservice extends Controller
         
         $returnData = check_app_login();
         if($returnData['statusCode']>1){
-            //die(json_encode($returnData));
+            die(json_encode($returnData));
         }
         
         $this->member_id = session('member_id');
@@ -60,7 +62,7 @@ class Videoservice extends Controller
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE');
         header('Access-Control-Max-Age: 1728000');
         
-        $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos']; 
+        $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses']; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -87,13 +89,15 @@ class Videoservice extends Controller
         $accept = $request->post('accept');
         $gold = $request->post('gold');
         $tags = $request->post('tags');
+        $class = $request->post('class');
         $img = $request->file('fileimg');
-        $video = $request->file('filevideo');
+        $video = $request->file('filevideo'); 
+       
         unset($videoData);
         $videoData['title'] = $title;
         $videoData['accept'] = $accept;
         $rule = [
-            'title|视频标题' => 'require|min:8|max:20',
+            //'title|视频标题' => 'require|min:8|max:20',
             'accept'=>'accepted'
         ];
         $message = [
@@ -102,10 +106,10 @@ class Videoservice extends Controller
             'title.max'  => '标题必须在8~20之间',
             'accept.accepted' => '请点击同意协议后再上传'
         ];
-        /* $validateResult = $this->validate($videoData, $rule, $message);
+        $validateResult = $this->validate($videoData, $rule, $message);
         if ($validateResult !== true) {
             die(json_encode(['resultCode' => 6005,'error' => $validateResult]));
-        } */
+        }
         
         if(!$img||!$video) {
             die(json_encode(['resultCode' => 6003,'error' => $this->err['6003']]));
@@ -114,9 +118,14 @@ class Videoservice extends Controller
         $errInfo = array();
         $imgInfo = array();
         $videoInfo = array();
+        if($this->member_id){
+            $movePath = ROOT_PATH . $this->resource_path . $this->member_id;
+        } else{
+            $movePath = ROOT_PATH . $this->resource_path;
+        }
         if($img){
             unset($info);
-            $info = $img->validate(['size'=>1048576,'ext'=>'jpg,png,gif'])->move(ROOT_PATH . $this->resource_path . $this->member_id?$this->member_id:'default');
+            $info = $img->validate(['size'=>1048576,'ext'=>'jpg,png,gif'])->move($movePath);
             if($info){
                 $imgInfo['ext'] = $info->getExtension();
                 $imgInfo['saveName'] = $info->getSaveName();
@@ -128,7 +137,7 @@ class Videoservice extends Controller
         
         if($video){
             unset($info);
-            $info = $video->validate(['size'=>31457280,'ext'=>'mp4'])->move(ROOT_PATH . $this->resource_path. $this->member_id?$this->member_id:'default');//需要同时更改php.ini的post_max_size = 30M
+            $info = $video->validate(['size'=>31457280,'ext'=>'mp4'])->move($movePath);//需要同时更改php.ini的post_max_size = 30M 
             if($info){
                 $videoInfo['ext'] = $info->getExtension();
                 $videoInfo['saveName'] = $info->getSaveName();
@@ -146,6 +155,8 @@ class Videoservice extends Controller
         if($gold) $videoData['gold'] = $gold;
         if($tags) $videoData['tag'] = implode(",", $tags);
         else $videoData['tag'] = 0;
+        if($class) $videoData['class'] = $class;
+        else $videoData['class'] = 0;
         $videoData['url'] = $videoInfo['saveName'];
         $videoData['thumbnail'] = $imgInfo['saveName'];
         $videoData['add_time'] = time();
@@ -269,7 +280,7 @@ class Videoservice extends Controller
         unset($param);        
         $param['order'] = 'add_time desc';
         
-        $comments = Db::name('comment')->field('resources_id, count(id ) as num')->group('resources_id')->order('num desc')->select();
+        $comments = Db::name('comment')->field('resources_id, count(id) as num')->group('resources_id')->order('num desc')->select();
         //dump($comments);
         if(!empty($comments)){
             $total = count($comments);
@@ -305,6 +316,53 @@ class Videoservice extends Controller
         
     }
     
+    /**
+     * 获取标签
+     * @param Request $request
+     * @return mixed
+     */
+    public function gettags(Request $request){
+        if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        
+        $resourceType = $request->post('rt/s', '1');
+        $tid = $request->post('tid/d', '');
+        
+        unset($where);
+        if($tid) $where['id'] = $tid;
+        $where['type'] = $resourceType;
+        $where['status'] = 1;
+        $tags = Db::name('tag')->field('id as tid, name')->where($where)->order('sort asc')->select();
+        
+        die(json_encode(['resultCode' => 0,'message' => "获取标签成功",'data' => $tags]));
+    }
+    
+    /**
+     * 获取分类
+     * @param Request $request
+     * @return mixed
+     */
+    public function getclasses(Request $request){
+        if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        
+        $resourceType = $request->post('rt/s', '1');
+        $pid = $request->post('cid/d', 0);
+        
+        unset($where);
+        $where['pid'] = $pid;
+        $where['type'] = $resourceType;
+        $where['status'] = 1;
+        $classlist = Db::name('class')->field('id as cid, name')->where($where)->order('sort asc')->select();
+        foreach ($classlist as $k=>$v){
+            $classlist[$k]['childs'] = Db::name('class')->field('id as cid, name')->where(['pid'=>$v['cid']])->select();
+        }
+        
+        die(json_encode(['resultCode' => 0,'message' => "获取分类成功",'data' => $classlist]));
+    }
+    
     private function fetchVideos($param = null){       
         
         $returnData = $videos = array();
@@ -313,7 +371,9 @@ class Videoservice extends Controller
         
         $query = new Query();
         
-        $query->name('video')->field('id, title, url, thumbnail, add_time, good, gold, click, tag, status, hint, is_check');
+        $query->name('video')->alias('v')
+                ->field('v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.headimgurl')
+                ->join('member m','v.user_id = m.id');
         
         if(isset($param['where'])&&!empty($param['where'])){
             $query->where($param['where']);
@@ -333,14 +393,16 @@ class Videoservice extends Controller
             $videos = $query->select();
             $total = $query->count();
         }
-        dump($query->getLastSql());
+        //dump($query->getLastSql());
         
         $returnData['currentPage'] = $currentPage;
         $returnData['total'] = $total;
         $returnData['videos'] = array();
         foreach($videos as &$v){
-            $v['url'] = $this->httpType.$_SERVER['HTTP_HOST']."/".str_replace('\\','/',$this->resource_path).str_replace('\\','/',$v['url']);
-            $v['thumbnail'] = $this->httpType.$_SERVER['HTTP_HOST']."/".str_replace('\\','/',$this->resource_path).str_replace('\\','/',$v['thumbnail']);
+            $v['url'] = $this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
+            $v['thumbnail'] = $this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
+            if(!$v['headimgurl']) $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+            
             array_push($returnData['videos'], $v);
         }
         
