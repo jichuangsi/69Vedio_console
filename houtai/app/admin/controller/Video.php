@@ -494,14 +494,7 @@ class Video extends Admin
          $cla=$request->get('class/d',0);
          $pid=$request->param("pid");
          $where=" 1=1 and video.is_check=1 ";
-         if(!empty($pid)){
-             $where.=" and video.pid={$pid} ";
-             $this->assign('pid',$pid);
-             $ptl='gather_lists';
-         }else{
-             $where.=" and video.type=0 ";
-             $ptl='lists';
-         }
+         $ptl='lists';
          if($key!='0' && !empty($key) && $key!=''){
              switch ($select){
                  case 1:
@@ -529,7 +522,7 @@ class Video extends Admin
         }
         //echo $where;die;
         //$data_list=$videodb->where($where)->order("id",'desc')->paginate(null,false,['query'=>$request->get()]);
-        $data_list=$this->myDb->view('video','id,title,info,key_word,update_time,click,good,thumbnail,user_id,status,is_check,sort,type,gold')
+        $data_list=$this->myDb->view('video','id,title,info,key_word,update_time,click,good,thumbnail,user_id,status,is_check,sort,type,gold,recommend')
             ->view('class','name as class','video.class=class.id and class.type=1')
             ->where($where)->order("id",'desc')->cache(120)->paginate(null,false,['query'=>$request->get()]);
 
@@ -657,4 +650,39 @@ class Video extends Admin
     public function deleteClass(){
         return  $this->khdel('1');die;
     }
+    
+    /**
+     *修改是否推荐状态 
+     * @author frs whs tcl dreamer ©2016
+     * @return mixed
+     */
+    public function khrecommend() {
+        $val   = input('param.val');
+        $ids   = input('param.ids/a') ? input('param.ids/a') : input('param.id/a');
+        $table = input('param.table');
+        $field = input('param.field', 'recommend');
+        if (empty($ids)) {
+            return $this->error('参数传递错误[1]！');
+        }
+        if (empty($table)) {
+            return $this->error('参数传递错误[2]！');
+        }
+        // 以下表操作需排除值为1的数据
+        if ($table == 'admin_menu' || $table == 'admin_user' || $table == 'admin_role' || $table == 'admin_module') {
+            if (in_array('1', $ids) || ($table == 'admin_menu' && in_array('2', $ids))) {
+                return $this->error('系统限制操作');
+            }
+        }
+        // 获取主键
+        $pk = $this->myDb->name($table)->getPk();
+        $map = [];
+        $map[$pk] = ['in', $ids];
+
+        $res = $this->myDb->name($table)->where($map)->setField($field, $val);
+        if ($res === false) {
+            return $this->error('状态设置失败');
+        }
+        return $this->success('状态设置成功');
+    }
+    
 }

@@ -21,7 +21,11 @@ class Videoservice extends Controller
         '6003' => '视频上传异常',
         '6004' => '视频上传失败',
         '6005' => '视频校验错误',
-        '6006' => '视频保存失败'
+        '6006' => '视频保存失败',
+        '6007' => '缺少参数',
+        '6008' => '视频不存在',
+        '6009' => '用户不存在',
+        '6010' => '视频收藏失败'
     ];
     
     private $member_id;
@@ -49,7 +53,7 @@ class Videoservice extends Controller
         
         $returnData = check_app_login();
         if($returnData['statusCode']>1){
-            die(json_encode($returnData));
+//          die(json_encode($returnData));
         }
         
         $this->member_id = session('member_id');
@@ -64,7 +68,7 @@ class Videoservice extends Controller
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE');
         header('Access-Control-Max-Age: 1728000');
         
-        $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses']; 
+        $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection']; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -82,6 +86,65 @@ class Videoservice extends Controller
         die(json_encode($returnData));
     }    
     
+    /*
+     * 首页推荐视频
+     */
+    public function homevideo(Request $request){
+		if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+//      die(json_encode(['resultCode' => 0,'message' => '获取首页推荐视频成功','data' => '1231231']));
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        
+        unset($param);
+//      $param['where'] = ['v.title'=>['like','%ff%']];
+        $param['where'] = ['v.status'=>1,'v.recommend'=>1];
+        $param['pager'] = array('page'=>$page, 'rows'=>$rows);
+        $param['order'] = 'add_time desc';
+        $videos=$this->fetchVideos($param);
+        if(!empty($videos['videos'])){
+        	foreach($videos['videos'] as $k=>$val){
+        		$videos['videos'][$k]['url']='require("'.$val['url'].'")';
+        		$videos['videos'][$k]['headimgurl']='require("'.$val['headimgurl'].'")';
+        		$videos['videos'][$k]['thumbnail']='require("'.$val['thumbnail'].'")';
+        	}
+        }
+        die(json_encode(['resultCode' => 0,'message' => '获取推荐视频成功','data' => $videos]));
+    }
+    /*
+     * 收藏视频
+     */
+    public function videocollection(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid=$request->post('uid');   //用户id
+        $vid=$request->post('vid');   //视频id
+        if(empty($uid) || empty($vid)){
+        	die(json_encode(['statusCode' => 6007, 'error' => $this->err['6007']]));
+        }
+        $vcount=Db::name('video')->where(['id'=>$vid])->count(); //检查视频是否存在
+        if($vcount<=0){
+        	die(json_encode(['statusCode' => 6008, 'error' => $this->err['6008']]));
+        }
+        $ucount=Db::name('member')->where('id',$uid)->count();  //检查用户是否存在
+        if($ucount<=0){
+        	die(json_encode(['statusCode' => 6009, 'error' => $this->err['6009']]));
+        }
+        $time=time();
+        $vcdata=[
+        	'user_id'=>$uid,
+        	'video_id'=>$vid,
+        	'collection_time'=>$time
+        ];
+        //添加收藏记录并返回记录id
+        $vcresult=Db::name('video_collection')->insertGetId($vcdata);
+        if($vcdata>0){
+        	die(json_encode(['resultCode' => 0,'message' => '收藏视频成功','data' => $vcresult]));
+        }
+       die(json_encode(['statusCode'=>6010,'error'=>$this->err['6010']]));
+    }
     /**
      * App视频上传
      * @param Request $request

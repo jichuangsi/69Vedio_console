@@ -109,8 +109,8 @@ $ca = strtolower(request()->controller().'/'.request()->action());
     </div>
 
   
-     <div class="layui-footer footer">
-        <span class="fl" style="color: #ff0072 !important;font-weight: 700 !important;font-size: 16px !important; display:block !important;"> &#26356;&#22810;&#31934;&#21697;&#28304;&#30721;&#35831;&#35775;&#38382;&#31859;&#31890;&#23567;&#23627;&#119;&#119;&#119;&#46;&#109;&#50;&#49;&#51;&#46;&#99;&#110;
+     <div class="layui-footer footer" style="display: none;">
+        <span class="fl" style="color: #ff0072 !important;font-weight: 700 !important;font-size: 16px !important; display:block !important;">&#26356;&#22810;&#31934;&#21697;&#28304;&#30721;&#35831;&#35775;&#38382;&#31859;&#31890;&#23567;&#23627;&#119;&#119;&#119;&#46;&#109;&#50;&#49;&#51;&#46;&#99;&#110;
        </span>
        <span class="fr"> © 2017-2018 <a href="/" target="_blank">MsvodX</a> All Rights Reserved.</span>
     </div>

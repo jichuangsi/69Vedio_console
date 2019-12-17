@@ -40,7 +40,7 @@ body{background-color:#fff;}
 .main-nav .layui-nav-item a{font-size:16px;padding:0;margin:0 15px;}
 .footer{line-height:44px;padding:0 10px;color:#666;}
 .footer a{color:#5c90d2;}
-#switchNav{position:fixed;background:url(http://t.cn/EIMbMEp) no-repeat 0 95%;left:0;top:60px;z-index:999}
+#switchNav{position:fixed;left:0;top:60px;z-index:999}
 #switchNav .layui-nav-child dd{position:relative;}
 #switchNav .layui-nav-child dd .j-del-menu{position:absolute;right:10px;top:3px;font-size:18px;color:#999;cursor:pointer;}
 #switchNav .layui-nav-child dd .j-del-menu:hover{color:#fff;}

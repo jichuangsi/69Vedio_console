@@ -105,7 +105,7 @@ class AdminMenu extends Model
      * @author frs whs tcl dreamer ©2016
      * @return array
      */
-    public static function getAllChild($pid = 0, $status = 1, $field = 'id,pid,module,title,url,param,target,icon,sort,status', $level = 0, $data = [])
+    public static function getAllChild($pid = 0, $status = 1, $field = 'id,pid,module,title,url,param,target,icon,sort,nav,status', $level = 0, $data = [])
     {
         $cache_tag = md5('_admin_child_menu'.$pid.$field.$status.dblang('admin'));
         $trees = [];
