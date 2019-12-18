@@ -13,7 +13,7 @@ use think\Request;
 use think\Db;
 use think\Db\Query;
 
-class Videoservice extends Controller
+class Videoservice extends Baseservice
 {
     private $err = [
         '6001' => '请求方式错误',
@@ -28,7 +28,7 @@ class Videoservice extends Controller
         '6010' => '视频收藏失败'
     ];
     
-    private $member_id;
+    /* private $member_id;
     
     private $resource_path;
     
@@ -40,7 +40,7 @@ class Videoservice extends Controller
     
     private $default_app_avatar = '/tpl/default/app/static/images/logo.png';
     
-    private $default_user_avatar = '/tpl/default/app/static/images/user.png';
+    private $default_user_avatar = '/tpl/default/app/static/images/user.png'; */
     
     public function __construct(Request $request)
     {
@@ -51,9 +51,9 @@ class Videoservice extends Controller
          header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
          header('Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With'); */
         
-        $returnData = check_app_login();
+        /* $returnData = check_app_login();
         if($returnData['statusCode']>1){
-//          die(json_encode($returnData));
+          die(json_encode($returnData));
         }
         
         $this->member_id = session('member_id');
@@ -66,7 +66,9 @@ class Videoservice extends Controller
         }        
         header('Access-Control-Allow-Headers: Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE');
-        header('Access-Control-Max-Age: 1728000');
+        header('Access-Control-Max-Age: 1728000'); */
+        
+        parent::__construct($request);
         
         $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection']; 
         
@@ -353,7 +355,7 @@ class Videoservice extends Controller
             foreach($comments as $v){
                 array_push($vids, $v['resources_id']);
             }
-            $param['where'] = ['id'=>['IN', $vids]];
+            $param['where'] = ['v.id'=>['IN', $vids]];
             $param['pager'] = array('page'=>$page, 'rows'=>$rows, 'simple'=>$total);
         }else{
             $param['pager'] = array('page'=>$page, 'rows'=>$rows);
@@ -464,14 +466,14 @@ class Videoservice extends Controller
         $returnData['total'] = $total;
         $returnData['videos'] = array();
         foreach($videos as &$v){
-            $v['url'] = $this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
-            $v['thumbnail'] = $this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
+            $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
+            $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
             if($v['user_id']===0){
                 $v['username'] = '69官方';
-                $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
+                $v['headimgurl'] = $this->getDefaultUserAvater(true);//$this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
             }else{
-                if(!$v['headimgurl']) $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
-                else $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].str_replace('\\','/',$v['headimgurl']);
+                if(!$v['headimgurl']) $v['headimgurl'] = $this->getDefaultUserAvater();
+                else $v['headimgurl'] = $this->getFullResourcePath($v['headimgurl'], $v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST'].str_replace('\\','/',$v['headimgurl']);
                 if(!$v['username']) $v['username'] = '未知用户';
             }            
             

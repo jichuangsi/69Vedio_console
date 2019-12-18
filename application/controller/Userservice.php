@@ -61,6 +61,11 @@ class Userservice extends Controller
         die(json_encode($returnData));
     }    
     
+    /**
+     * 新用户注册，旧用户信息获取
+     * @param Request $request
+     * @return mixed
+     */
     public function register(Request $request){
         if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();

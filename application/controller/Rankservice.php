@@ -13,16 +13,16 @@ use think\Request;
 use think\Db;
 use think\Db\Query;
 
-class Rankservice extends Controller
+class Rankservice extends Baseservice
 {
     private $err = [
         '7001' => '请求方式错误',
         '7002' => '请求接口不存在',
     ];
     
-    private $member_id;
+    /* private $member_id;
     
-    //private $resource_path;
+    private $resource_path;
     
     private $listRows = 6;
     
@@ -32,7 +32,7 @@ class Rankservice extends Controller
     
     private $default_user_avatar = '/tpl/default/app/static/images/user.png';
     
-    //private $authHeaders = ['multipart/form-data'];
+    private $authHeaders = ['multipart/form-data']; */
     
     public function __construct(Request $request)
     {
@@ -43,22 +43,24 @@ class Rankservice extends Controller
          header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
          header('Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With'); */
         
-        $returnData = check_app_login();
+        /* $returnData = check_app_login();
         if($returnData['statusCode']>1){
             die(json_encode($returnData));
         }
         
         $this->member_id = session('member_id');
-        //$this->resource_path = 'public' . DS . 'uploads' . DS;
+        $this->resource_path = 'public' . DS . 'uploads' . DS;
         $this->httpType = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? 'https://' : 'http://';
         
         header('Access-Control-Allow-Origin: *');
-        /* if(!empty($request->header('Content-Type'))&&in_array(strtolower($request->header('Content-Type')), $this->authHeaders)){
+        if(!empty($request->header('Content-Type'))&&in_array(strtolower($request->header('Content-Type')), $this->authHeaders)){
             header('Access-Control-Allow-Credentials: true');
-        } */
+        }
         header('Access-Control-Allow-Headers: Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE');
-        header('Access-Control-Max-Age: 1728000');
+        header('Access-Control-Max-Age: 1728000'); */
+        
+        parent::__construct($request);
         
         $noAuthAct = ['popularrank','inviterank','uploadrand'];
         
@@ -97,15 +99,15 @@ class Rankservice extends Controller
         foreach($goodmost as &$v){
             if($v['user_id']===0){
                 $v['username'] = '69官方';
-                $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
+                $v['headimgurl'] = $this->getDefaultUserAvater(true);
             }else{
                 $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['user_id']])->select();
                 if($user){                    
                     $v['username'] = $user[0]['username'];
-                    $v['headimgurl'] = $user[0]['headimgurl'];
+                    $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
                     $v['username'] = '未知用户';
-                    $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                    $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
             }
         }
@@ -116,10 +118,10 @@ class Rankservice extends Controller
             $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['pid']])->select();
             if($user){
                 $v['username'] = $user[0]['username'];
-                $v['headimgurl'] = $user[0]['headimgurl']?$user[0]['headimgurl']:$this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
             }else{
                 $v['username'] = '未知用户';
-                $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                $v['headimgurl'] = $this->getDefaultUserAvater();
             }
         }
         
@@ -133,10 +135,10 @@ class Rankservice extends Controller
                 $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['user_id']])->select();
                 if($user){
                     $v['username'] = $user[0]['username'];
-                    $v['headimgurl'] = $user[0]['headimgurl'];
+                    $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
                     $v['username'] = '未知用户';
-                    $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                    $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
             }
         }
@@ -172,10 +174,10 @@ class Rankservice extends Controller
             $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['pid']])->select();
             if($user){
                 $v['username'] = $user[0]['username'];
-                $v['headimgurl'] = $user[0]['headimgurl']?$user[0]['headimgurl']:$this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
             }else{
                 $v['username'] = '未知用户';
-                $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                $v['headimgurl'] = $this->getDefaultUserAvater();
             }
             array_push($returnData['members'], $v);
         }
@@ -203,22 +205,22 @@ class Rankservice extends Controller
         $members = $uploademost->items();
         $currentPage = $uploademost->currentPage();
         $total = $uploademost->total();
-                   
+        
         $returnData['currentPage'] = $currentPage;
         $returnData['total'] = $total;
         $returnData['members'] = array();
         foreach($members as &$v){
             if($v['user_id']===0){
                 $v['username'] = '69官方';
-                $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
+                $v['headimgurl'] = $this->getDefaultUserAvater(true);
             }else{
                 $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['user_id']])->select();
                 if($user){
                     $v['username'] = $user[0]['username'];
-                    $v['headimgurl'] = $user[0]['headimgurl'];
+                    $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
                     $v['username'] = '未知用户';
-                    $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                    $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
             }
             array_push($returnData['members'], $v);

@@ -13,7 +13,7 @@ use think\Request;
 use think\Db;
 use think\Db\Query;
 
-class Geoservice extends Controller
+class Geoservice extends Baseservice
 {
     private $err = [
         '8001' => '请求方式错误',
@@ -25,11 +25,19 @@ class Geoservice extends Controller
         '8007' => '获取当前用户定位信息异常',
     ];
     
-    private $member_id;
+    /* private $member_id;
     
-    //private $resource_path;
+    private $resource_path;
     
     private $listRows = 6;
+    
+    private $httpType;
+    
+    private $default_app_avatar = '/tpl/default/app/static/images/logo.png';
+    
+    private $default_user_avatar = '/tpl/default/app/static/images/user.png';
+    
+    private $authHeaders = ['multipart/form-data']; */
     
     private $locateTimeout = 5;    
     
@@ -43,14 +51,6 @@ class Geoservice extends Controller
     
     private $locate_api_coordtype = 'wgs84ll';
     
-    private $httpType;
-    
-    private $default_app_avatar = '/tpl/default/app/static/images/logo.png';
-    
-    private $default_user_avatar = '/tpl/default/app/static/images/user.png';
-    
-    //private $authHeaders = ['multipart/form-data'];
-    
     public function __construct(Request $request)
     {
         //$origin=$request->header('origin'); //"http://sp.msvodx.com"
@@ -60,22 +60,24 @@ class Geoservice extends Controller
          header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
          header('Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With'); */
         
-        $returnData = check_app_login();
+        /* $returnData = check_app_login();
         if($returnData['statusCode']>1){
             die(json_encode($returnData));
         }
         
         $this->member_id = session('member_id');
-        //$this->resource_path = 'public' . DS . 'uploads' . DS;
+        $this->resource_path = 'public' . DS . 'uploads' . DS;
         $this->httpType = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? 'https://' : 'http://';
         
         header('Access-Control-Allow-Origin: *');
-        /* if(!empty($request->header('Content-Type'))&&in_array(strtolower($request->header('Content-Type')), $this->authHeaders)){
+        if(!empty($request->header('Content-Type'))&&in_array(strtolower($request->header('Content-Type')), $this->authHeaders)){
             header('Access-Control-Allow-Credentials: true');
-        } */
+        }
         header('Access-Control-Allow-Headers: Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE');
-        header('Access-Control-Max-Age: 1728000');
+        header('Access-Control-Max-Age: 1728000'); */
+        
+        parent::__construct($request);
         
         $noAuthAct = ['locate','getlocation','nearbymember'];
         
@@ -240,10 +242,10 @@ class Geoservice extends Controller
                 $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['uid']])->select();
                 if($user){
                     $v['username'] = $user[0]['username'];
-                    $v['headimgurl'] = $user[0]['headimgurl']?$user[0]['headimgurl']:$this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                    $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
                     $v['username'] = '未知用户';
-                    $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_user_avatar;
+                    $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
                 array_push($returnData, $v);
             }
