@@ -247,6 +247,16 @@ class Geoservice extends Baseservice
                     $v['username'] = '未知用户';
                     $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
+                
+                //检查是否关注,0为已关注，1为互关，null为没关注
+                unset($map);
+                $map['uid'] = $this->member_id;
+                $map['cid'] = $v['uid'];                
+                $cuser = Db::name('member_collection')->field('id,status')->where($map)->select();
+                if($cuser&&$cuser[0]){
+                    $v['concerned'] = $cuser[0]['status'];
+                }                
+                
                 array_push($returnData, $v);
             }
             

@@ -35,7 +35,7 @@ class Baseservice extends Controller
     {        
         
         $returnData = check_app_login();
-        if($returnData['statusCode']>1){
+        if($returnData['resultCode']>1){
           die(json_encode($returnData));
         }
         

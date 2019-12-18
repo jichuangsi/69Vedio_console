@@ -179,6 +179,9 @@ class Rankservice extends Baseservice
                 $v['username'] = '未知用户';
                 $v['headimgurl'] = $this->getDefaultUserAvater();
             }
+            
+            $v['concerned'] = $this->checkConcern($v['pid']);
+            
             array_push($returnData['members'], $v);
         }
         
@@ -222,10 +225,34 @@ class Rankservice extends Baseservice
                     $v['username'] = '未知用户';
                     $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
+                
+                $v['concerned'] = $this->checkConcern($v['user_id']);
+                
             }
             array_push($returnData['members'], $v);
         }
         
         die(json_encode(['resultCode' => 0,'message' => "获取上传大神成功",'data' => $returnData]));
+    }
+    
+    //检查是否关注,-1为自己，0为已关注，1为互关，null为没关注
+    private function checkConcern($uid=''){
+        if(!$uid) return null;
+
+        $concern = null;        
+        
+        if($this->member_id==$uid){
+            $concern = -1;
+        }else{
+            unset($map);
+            $map['uid'] = $this->member_id;
+            $map['cid'] = $uid;
+            $cuser = Db::name('member_collection')->field('id,status')->where($map)->select();
+            if($cuser&&$cuser[0]){
+                $concern = $cuser[0]['status'];
+            }
+        }
+        
+        return $concern;
     }
 }

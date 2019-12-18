@@ -342,19 +342,19 @@ function check_app_login()
     $user_id = session('member_id');
     //验证登陆
     if (intval($user_id) <= 0) {
-        $data = ['statusCode' => 2, 'error' => '用户未登陆'];
+        $data = ['resultCode' => 2, 'error' => '用户未登陆'];
         return $data;
         die;
     }
     $user_info = db::name('member')->where(array('id' => $user_id))->find();
     if (!$user_info) {
-        $data = ['statusCode' => 3, 'error' => '该用户已在其他地方登陆'];
+        $data = ['resultCode' => 3, 'error' => '该用户已在其他地方登陆'];
         session('member_id', '0');
         session('member_info', '');
         return $data;
         die;
     }
-    $data = ['statusCode' => 1, 'message' => '用户已经登录'];
+    $data = ['resultCode' => 1, 'message' => '用户已经登录'];
     return $data;
 }
 

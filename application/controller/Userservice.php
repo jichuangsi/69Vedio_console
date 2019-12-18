@@ -116,7 +116,9 @@ class Userservice extends Controller
                 'du'=>$device_uuid,
                 'register_time'=>time()
             ];        
-            $ret = Db::name('devices')->where(['puid'=>$user[0]['puid'],'code'=>$user[0]['code']])->update($update);            
+            $ret = Db::name('devices')->where(['puid'=>$user[0]['puid'],'code'=>$user[0]['code']])->update($update);  
+            
+            Db::name('member')->where(['id'=>$user[0]['puid'],'is_agent'=>0])->update(['is_agent'=>1]);
         }else if(!$user&&$uid){
             $this->createDevice($request, $uid);
         }

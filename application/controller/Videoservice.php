@@ -70,7 +70,9 @@ class Videoservice extends Baseservice
         
         parent::__construct($request);
         
-        $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection']; 
+        $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection',
+            'concernvideos'
+        ]; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -384,6 +386,38 @@ class Videoservice extends Baseservice
     }
     
     /**
+     * 关注人视频
+     * @param Request $request
+     */
+    public function concernvideos(Request $request){
+        if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        
+        unset($where);
+        $where['uid'] = $this->member_id;
+        
+        $cusers = Db::name('member_collection')->field('cid')->where($where)->group('cid')->select();
+        
+        $returnData = array();
+        if($cusers){
+            $cids = array();
+            foreach($cusers as $v){
+                array_push($cids, $v['cid']);
+            }
+            $param['where'] = ['v.user_id'=>['IN', $cids]];
+            $param['pager'] = array('page'=>$page, 'rows'=>$rows);
+            $param['order'] = 'add_time desc';
+            
+            $returnData = $this->fetchVideos($param);
+        }
+        
+        die(json_encode(['resultCode' => 0,'message' => "获取关注人视频成功",'data' => $returnData]));
+    }
+    
+    /**
      * 获取标签
      * @param Request $request
      * @return mixed
@@ -458,7 +492,7 @@ class Videoservice extends Baseservice
             //$query->page($param['pager']['page'], $param['pager']['rows']);
         }else{
             $videos = $query->select();
-            $total = $query->count();
+            $total = count($videos);
         }
         //dump($query->getLastSql());
         
