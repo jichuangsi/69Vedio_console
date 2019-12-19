@@ -25,8 +25,8 @@ class Videoservice extends Baseservice
         '6007' => '缺少参数',
         '6008' => '视频不存在',
         '6009' => '用户不存在',
-        '6010' => '视频收藏失败',
-        '6011' => '取消收藏失败'
+        '6010' => '视频点赞失败',
+        '6011' => '取消点赞失败'
     ];
     
     /* private $member_id;
@@ -103,7 +103,7 @@ class Videoservice extends Baseservice
         $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
         
         unset($param);
-        $uid=165;
+        $uid=$this->member_id;
 //      $param['where'] = ['v.title'=>['like','%ff%']];
         $param['where'] = ['v.status'=>1,'v.recommend'=>1];
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
@@ -120,13 +120,13 @@ class Videoservice extends Baseservice
         die(json_encode(['resultCode' => 0,'message' => '获取推荐视频成功','data' => $videos]));
     }
     /*
-     * 收藏视频
+     * 点赞视频
      */
     public function videocollection(Request $request){
     	if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-        $uid=165;//$this->member_id;//$request->post('uid');   //用户id
+        $uid=$this->member_id;//$request->post('uid');   //用户id
         $vid=$request->post('vid');   //视频id
         if(empty($uid) || empty($vid)){
         	die(json_encode(['resultCode' => 6007, 'error' => $this->err['6007']]));
@@ -139,32 +139,32 @@ class Videoservice extends Baseservice
         if($ucount<=0){
         	die(json_encode(['resultCode' => 6009, 'error' => $this->err['6009']]));
         }
-        $vcount=DB::name('video_collection')->where(['user_id'=>$uid,'video_id'=>$vid])->count();
+        $vcount=DB::name('video_good_log')->where(['user_id'=>$uid,'video_id'=>$vid])->count();
         if($vcount>0){
-        	die(json_encode(['resultCode'=>0,'message'=>'已收藏','data'=>$vcount]));
+        	die(json_encode(['resultCode'=>0,'message'=>'已点赞','data'=>$vcount]));
         }
         $time=time();
         $vcdata=[
         	'user_id'=>$uid,
         	'video_id'=>$vid,
-        	'collection_time'=>$time
+        	'add_time'=>$time
         ];
-        //添加收藏记录并返回记录id
-        $vcresult=Db::name('video_collection')->insertGetId($vcdata);
+        //添加点赞记录并返回记录id
+        $vcresult=Db::name('video_good_log')->insertGetId($vcdata);
         $rs=DB::query("update ms_video set good=good+1 where id=$vid");
         if($vcresult>0){
-        	die(json_encode(['resultCode' => 0,'message' => '收藏视频成功','data' => $vcresult]));
+        	die(json_encode(['resultCode' => 0,'message' => '点赞视频成功','data' => $vcresult]));
         }
        die(json_encode(['resultCode'=>6010,'error'=>$this->err['6010']]));
     }
     /*
-     * 取消视频收藏
+     * 取消视频点赞
      */
     public function cancelcollection(Request $request){
 		if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-        $uid=165;//$this->member_id;//$request->post('uid');   //用户id
+        $uid=$this->member_id;//$request->post('uid');   //用户id
         $vid=$request->post('vid');   //视频id
         if(empty($uid) || empty($vid)){
         	die(json_encode(['resultCode' => 6007, 'error' => $this->err['6007']]));
@@ -182,13 +182,10 @@ class Videoservice extends Baseservice
         	'user_id'=>$uid,
         	'video_id'=>$vid,
         ];
-        //添加收藏记录并返回记录id
-//       $vcresult =Db::delete('video_collection')->where($vcdata);
-//      $vcresult=Db::name('video_collection')->delete('id',77);
-        $vcresult=Db::query("delete from ms_video_collection where user_id=$uid and video_id=$vid");
+        $vcresult=Db::query("delete from ms_video_good_log where user_id=$uid and video_id=$vid");
         $rs=DB::query("update ms_video set good=good-1 where id=$vid");
         if($vcresult>0){
-        	die(json_encode(['resultCode' => 0,'message' => '取消收藏成功','data' => $vcresult]));
+        	die(json_encode(['resultCode' => 0,'message' => '取消点赞成功','data' => $vcresult]));
         }
        die(json_encode(['resultCode'=>6011,'error'=>$this->err['6011']]));
 	}
@@ -506,7 +503,6 @@ class Videoservice extends Baseservice
         
         die(json_encode(['resultCode' => 0,'message' => "获取分类成功",'data' => $classlist]));
     }
-    
     private function fetchVideos($param = null){       
         
         $returnData = $videos = array();

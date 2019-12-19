@@ -30,7 +30,6 @@ class Userservice extends Controller
     protected $beforeActionList = [
         'test'   =>  ['only'=>'register'],
     ]; */
-    
     public function __construct(Request $request)
     {
         //$origin=$request->header('origin'); //"http://sp.msvodx.com"
@@ -201,6 +200,8 @@ class Userservice extends Controller
         $userdata['nickname']=$userdata['username']='用户'.time().mt_rand(100,200);
         $userdata['add_time']=time();
         $userdata['last_ip']=$request->ip();
+        $userdata['sex']=1;
+        $userdata['birthday']=time();
         if($puid) $userdata['pid']=$puid;
         
         $uid=Db::name('member')->insertGetId($userdata);

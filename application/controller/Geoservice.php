@@ -79,7 +79,7 @@ class Geoservice extends Baseservice
         
         parent::__construct($request);
         
-        $noAuthAct = ['locate','getlocation','nearbymember'];
+        $noAuthAct = ['locate','getlocation','nearbymember','getaddress'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -90,13 +90,22 @@ class Geoservice extends Baseservice
             }
         }
     }
-    
     public function _empty()
     {
         $returnData = ['statusCode' => 8002, 'error' => $this->err['8002']];
         die(json_encode($returnData));
     } 
-    
+    /**
+     * 获取层级地区信息
+     */
+    public function getaddress(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $upid=$request->post('upid')?$request->post('upid'):0;
+        $address=Db::name('district')->field('id,name')->where('upid',$upid)->select();
+        die(json_encode(['resultCode' => 0,'message' => '获取层级地区信息成功','data' => $address]));
+    }
     /**
      * 用户定位
      * @param Request $request
@@ -244,9 +253,11 @@ class Geoservice extends Baseservice
                     $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
                     $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                     $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
+               		$v['sex']=$user[0]['sex'];
                 }else{
                     $v['username'] = $v['nickname'] = $this->default_user_name;
                     $v['headimgurl'] = $this->getDefaultUserAvater();
+               		$v['sex']=$user[0]['sex'];
                 }
                 
                 //检查是否关注,0为已关注，1为互关，null为没关注

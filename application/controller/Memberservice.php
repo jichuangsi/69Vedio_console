@@ -25,6 +25,9 @@ class Memberservice extends Baseservice
         '9006' => '已经关注过该用户',
         '9007' => '取消关注用户失败',
         '9008' => '指定用户不存在',
+        '9009' => '该账号已存在',
+        '9010' => '图片上传失败',
+        '9011' => '修改失败'
     ];
     
     /* private $member_id;
@@ -73,7 +76,7 @@ class Memberservice extends Baseservice
         
         $this->share_link_pattern = $this->httpType.$_SERVER['HTTP_HOST']."/share/";
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink'];
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -108,13 +111,13 @@ class Memberservice extends Baseservice
         unset($param);
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
         $query = new Query();
-        $query->name('video_collection')->alias('vc')
+        $query->name('video_good_log')->alias('vc')
                 ->field('vc.id as vcid,v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.headimgurl')
                 ->join('member m','vc.user_id = m.id')
         		->join('video v','vc.video_id = v.id');
 //      		$this->member_id
         $query->where(['vc.user_id'=>$uid]);
-        $query->order('collection_time desc');		
+        $query->order('add_time desc');		
        	if(isset($param['pager'])&&!empty($param['pager'])){
             $videosList = $query->paginate(['page'=>$param['pager']['page'], 'list_rows'=>$param['pager']['rows']],isset($param['pager']['simple'])?$param['pager']['simple']:false);
             $videos = $videosList->items();
@@ -154,9 +157,66 @@ class Memberservice extends Baseservice
         }
         $uid=$request->post('uid')?$request->post('uid'):$this->member_id;
         $member=Db::name('member')->field('*')->where('id',$uid)->select();
+        $member[0]['headimgurl']?$this->getFullResourcePath($member[0]['headimgurl'], $member[0]['id']):$this->getDefaultUserAvater();
+       	$member[0]['concerned']=$this->checkisfollow($this->member_id,$uid);//判断是否已经关注
         die(json_encode(['resultCode' => 0,'message' => '获取个人信息成功','data' => $member[0]]));
     }
-    
+    /**
+     * 编辑个人用户信息 
+     */
+    public function editmemberinfo(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid   = $this->member_id;
+        $uname = $request->post('username');
+        $nname = $request->post('nickname');
+        $introduce = $request->post('introduce')?$request->post('introduce'):'';
+        $sex = $request->post('sex')?$request->post('sex'):1;
+        $birthday = $request->post('birthday')?strtotime($request->post('birthday')):0;
+        $img = $request->file('fileimg');
+        $region = $request->post('region')?$request->post('region'):0; 
+         //判断账号是否已存在
+        if($uname){
+        	$isuname=Db::name('member')->where(['username' => $uname,'id'=>['<>',$uid]])->count();
+        	if($isuname>0) die(json_encode(['resultCode'=>9009,'error' => $this->err['9009']]));
+        }
+        
+         $imgInfo = array();
+        if($uid){
+            $movePath = ROOT_PATH . $this->resource_path . $uid;
+        } else{
+            $movePath = ROOT_PATH . $this->resource_path;
+        }
+        if($img){
+            unset($info);
+            $info = $img->validate(['size'=>1048576,'ext'=>'jpg,png,gif'])->move($movePath);
+            if($info){
+                $imgInfo['ext'] = $info->getExtension();
+                $imgInfo['saveName'] = $info->getSaveName();
+                $imgInfo['fileName'] = $info->getFilename();
+            }else{
+            	die(json_encode(['resultCode' => 9010,'error' => $img->getError()]));
+            }
+        } 
+        unset($update);
+       	$update=[
+       		'username' => $uname,
+       		'nickname' => $nname,
+       		'introduce'=> $introduce,
+       		'sex'      => $sex,
+       		'birthday' => $birthday,
+       	];
+       	if($img){
+       		$update['headimgurl']=$imgInfo['saveName'];
+       	}
+       	if($imgInfo) $update['headimgurl'];
+		 $mresult=Db::name('member')->where('id',$uid)->update($update);
+		 if($mresult>0){
+		 	die(json_encode(['resultCode' => 0,'message' => '个人信息修改成功','data' => $mresult]));
+		 }
+		 die(json_encode(['resultCode'=>9011,'error' => $this->err['9011']]));      
+    }
     /**
      * 关注用户
      * @param Request $request
@@ -273,6 +333,10 @@ class Memberservice extends Baseservice
             $ret = Db::transaction(function() use($where){
                 Db::name('member_collection')->where($where)->update(['status'=>0]);
             });
+        }else if($concern&&!$concerned){
+        	$ret = Db::transaction(function() use($data){
+                Db::name('member_collection')->where($data)->delete();
+            });
         }
         
         if(!$ret){
@@ -329,8 +393,12 @@ class Memberservice extends Baseservice
         $param['join'] = $join;
         $param['where'] = $where;
         $param['order'] = 'm.username asc';
-        
-        die(json_encode(['resultCode' => 0,'message' => "获取关注列表成功",'data' => $this->fetchMembers($param)]));
+        //获取关注状态
+        $concenrns=$this->fetchMembers($param);
+        foreach($concenrns['members'] as $k=>$v){
+        	$concenrns['members'][$k]['concerned']=$this->checkisfollow($this->member_id,$v['id']);
+        }
+        die(json_encode(['resultCode' => 0,'message' => "获取关注列表成功",'data' => $concenrns]));
     }
     
     /**
@@ -354,8 +422,12 @@ class Memberservice extends Baseservice
         $param['join'] = $join;
         $param['where'] = $where;
         $param['order'] = 'm.username asc';
-        
-        die(json_encode(['resultCode' => 0,'message' => "获取粉丝列表成功",'data' => $this->fetchMembers($param)]));
+        //获取关注状态
+        $concerneds=$this->fetchMembers($param);
+        foreach($concerneds['members'] as $k=>$v){
+        	$concerneds['members'][$k]['concerned']=$this->checkisfollow($this->member_id,$v['id']);
+        }
+        die(json_encode(['resultCode' => 0,'message' => "获取粉丝列表成功",'data' => $concerneds]));
     }
     
     /**
@@ -410,10 +482,37 @@ class Memberservice extends Baseservice
             
             $returnData = $this->fetchMembers($param);
         }
+        foreach($returnData['members'] as $k=>$v){
+        	//检查是否已经关注
+	        $returnData['members'][$k]['concerned']=$this->checkisfollow($this->member_id,$v['id']);
+        }
         
         die(json_encode(['resultCode' => 0,'message' => "获取推荐关注成功",'data' => $returnData]));
     }
     
+    /*
+     * 检查关注状态
+     */
+    private function checkisfollow($uid=null,$cid=null){
+    	if(!$uid||!$cid){
+    		return null;
+    	}
+    	unset($data);
+    	$data['uid'] = $uid;
+	    $data['cid'] = $cid;
+    	$concern = Db::name('member_collection')->where($data)->count('id');
+    	unset($where);
+        $where['uid'] = $cid;
+        $where['cid'] = $uid;
+    	$concerned = Db::name('member_collection')->where($where)->count('id');
+    	if($concern>0&&$concerned>0){
+    		return 1;
+    	}else if($concern>0){
+    		return 0;
+    	}else{
+    		return null;
+    	}
+    }
     /**
      * 代理分享链接
      * @param Request $request
