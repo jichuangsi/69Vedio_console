@@ -68,7 +68,7 @@ class Memberservice extends Baseservice
         
         parent::__construct($request);
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns'];
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -85,6 +85,72 @@ class Memberservice extends Baseservice
         $returnData = ['statusCode' => 9002, 'error' => $this->err['9002']];
         die(json_encode($returnData));
     } 
+    
+     /*
+     * 用户的喜欢视频列表
+     */
+    public function mylike(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $returnData = $videos = array();
+        $currentPage=1;
+        $total=0;
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        $uid=$request->post('uid')?$request->post('uid'):$this->member_id;
+        
+        unset($param);
+        $param['pager'] = array('page'=>$page, 'rows'=>$rows);
+        $query = new Query();
+        $query->name('video_collection')->alias('vc')
+                ->field('vc.id as vcid,v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.headimgurl')
+                ->join('member m','vc.user_id = m.id')
+        		->join('video v','vc.video_id = v.id');
+//      		$this->member_id
+        $query->where(['vc.user_id'=>$uid]);
+        $query->order('collection_time desc');		
+       	if(isset($param['pager'])&&!empty($param['pager'])){
+            $videosList = $query->paginate(['page'=>$param['pager']['page'], 'list_rows'=>$param['pager']['rows']],isset($param['pager']['simple'])?$param['pager']['simple']:false);
+            $videos = $videosList->items();
+            $currentPage = $videosList->currentPage();
+            $total = $videosList->total();
+            $pages=(int)$page;
+        }else{
+            $videos = $query->select();
+            $total = $query->count();
+        }
+        $returnData['currentPage'] = $currentPage;
+        $returnData['total'] = $total;
+        $returnData['videos'] = array();
+        foreach($videos as &$v){
+            $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
+            $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
+            if($v['user_id']===0){
+                $v['username'] = '69官方';
+                $v['headimgurl'] = $this->getDefaultUserAvater(true);//$this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
+            }else{
+                if(!$v['headimgurl']) $v['headimgurl'] = $this->getDefaultUserAvater();
+                else $v['headimgurl'] = $this->getFullResourcePath($v['headimgurl'], $v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST'].str_replace('\\','/',$v['headimgurl']);
+                if(!$v['username']) $v['username'] = '未知用户';
+            }     
+            $v['isgood']=DB::name('video_collection')->where(['user_id'=>$uid,'video_id'=>$v['id']])->count();       
+            array_push($returnData['videos'], $v);
+        }
+        die(json_encode(['resultCode' => 0,'message' => '获取喜欢视频列表成功','data' => $returnData]));
+    }
+    
+    /*
+     * 获取用户个人信息
+     */
+    public function getmemberinfo(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid=$request->post('uid')?$request->post('uid'):$this->member_id;
+        $member=Db::name('member')->field('*')->where('id',$uid)->select();
+        die(json_encode(['resultCode' => 0,'message' => '获取个人信息成功','data' => $member[0]]));
+    }
     
     /**
      * 关注用户

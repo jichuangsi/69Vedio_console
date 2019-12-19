@@ -186,7 +186,7 @@ class Userservice extends Controller
     
     private function createMember(Request $request, $puid=''){
         unset($userdata);
-        $userdata['username']='用户'.time().mt_rand(100,200);
+        $userdata['nickname']=$userdata['username']='用户'.time().mt_rand(100,200);
         $userdata['add_time']=time();
         $userdata['last_ip']=$request->ip();
         if($puid) $userdata['pid']=$puid;

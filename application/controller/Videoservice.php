@@ -25,7 +25,8 @@ class Videoservice extends Baseservice
         '6007' => '缺少参数',
         '6008' => '视频不存在',
         '6009' => '用户不存在',
-        '6010' => '视频收藏失败'
+        '6010' => '视频收藏失败',
+        '6011' => '取消收藏失败'
     ];
     
     /* private $member_id;
@@ -71,7 +72,7 @@ class Videoservice extends Baseservice
         parent::__construct($request);
         
         $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection',
-            'concernvideos'
+            'concernvideos','cancelcollection'
         ]; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
@@ -102,6 +103,7 @@ class Videoservice extends Baseservice
         $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
         
         unset($param);
+        $uid=165;
 //      $param['where'] = ['v.title'=>['like','%ff%']];
         $param['where'] = ['v.status'=>1,'v.recommend'=>1];
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
@@ -109,9 +111,10 @@ class Videoservice extends Baseservice
         $videos=$this->fetchVideos($param);
         if(!empty($videos['videos'])){
         	foreach($videos['videos'] as $k=>$val){
-        		$videos['videos'][$k]['url']='require("'.$val['url'].'")';
-        		$videos['videos'][$k]['headimgurl']='require("'.$val['headimgurl'].'")';
-        		$videos['videos'][$k]['thumbnail']='require("'.$val['thumbnail'].'")';
+				$videos['videos'][$k]['isgood']=DB::name('video_collection')->where(['user_id'=>$uid,'video_id'=>$val['id']])->count();        		
+//      		$videos['videos'][$k]['url']='require("'.$val['url'].'")';
+//      		$videos['videos'][$k]['headimgurl']='require("'.$val['headimgurl'].'")';
+//      		$videos['videos'][$k]['thumbnail']='require("'.$val['thumbnail'].'")';
         	}
         }
         die(json_encode(['resultCode' => 0,'message' => '获取推荐视频成功','data' => $videos]));
@@ -123,18 +126,22 @@ class Videoservice extends Baseservice
     	if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-        $uid=$request->post('uid');   //用户id
+        $uid=165;//$this->member_id;//$request->post('uid');   //用户id
         $vid=$request->post('vid');   //视频id
         if(empty($uid) || empty($vid)){
-        	die(json_encode(['statusCode' => 6007, 'error' => $this->err['6007']]));
+        	die(json_encode(['resultCode' => 6007, 'error' => $this->err['6007']]));
         }
         $vcount=Db::name('video')->where(['id'=>$vid])->count(); //检查视频是否存在
         if($vcount<=0){
-        	die(json_encode(['statusCode' => 6008, 'error' => $this->err['6008']]));
+        	die(json_encode(['resultCode' => 6008, 'error' => $this->err['6008']]));
         }
         $ucount=Db::name('member')->where('id',$uid)->count();  //检查用户是否存在
         if($ucount<=0){
-        	die(json_encode(['statusCode' => 6009, 'error' => $this->err['6009']]));
+        	die(json_encode(['resultCode' => 6009, 'error' => $this->err['6009']]));
+        }
+        $vcount=DB::name('video_collection')->where(['user_id'=>$uid,'video_id'=>$vid])->count();
+        if($vcount>0){
+        	die(json_encode(['resultCode'=>0,'message'=>'已收藏','data'=>$vcount]));
         }
         $time=time();
         $vcdata=[
@@ -144,11 +151,47 @@ class Videoservice extends Baseservice
         ];
         //添加收藏记录并返回记录id
         $vcresult=Db::name('video_collection')->insertGetId($vcdata);
-        if($vcdata>0){
+        $rs=DB::query("update ms_video set good=good+1 where id=$vid");
+        if($vcresult>0){
         	die(json_encode(['resultCode' => 0,'message' => '收藏视频成功','data' => $vcresult]));
         }
-       die(json_encode(['statusCode'=>6010,'error'=>$this->err['6010']]));
+       die(json_encode(['resultCode'=>6010,'error'=>$this->err['6010']]));
     }
+    /*
+     * 取消视频收藏
+     */
+    public function cancelcollection(Request $request){
+		if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid=165;//$this->member_id;//$request->post('uid');   //用户id
+        $vid=$request->post('vid');   //视频id
+        if(empty($uid) || empty($vid)){
+        	die(json_encode(['resultCode' => 6007, 'error' => $this->err['6007']]));
+        }
+        $vcount=Db::name('video')->where(['id'=>$vid])->count(); //检查视频是否存在
+        if($vcount<=0){
+        	die(json_encode(['resultCode' => 6008, 'error' => $this->err['6008']]));
+        }
+        $ucount=Db::name('member')->where('id',$uid)->count();  //检查用户是否存在
+        if($ucount<=0){
+        	die(json_encode(['resultCode' => 6009, 'error' => $this->err['6009']]));
+        }
+        $time=time();
+        $vcdata=[
+        	'user_id'=>$uid,
+        	'video_id'=>$vid,
+        ];
+        //添加收藏记录并返回记录id
+//       $vcresult =Db::delete('video_collection')->where($vcdata);
+//      $vcresult=Db::name('video_collection')->delete('id',77);
+        $vcresult=Db::query("delete from ms_video_collection where user_id=$uid and video_id=$vid");
+        $rs=DB::query("update ms_video set good=good-1 where id=$vid");
+        if($vcresult>0){
+        	die(json_encode(['resultCode' => 0,'message' => '取消收藏成功','data' => $vcresult]));
+        }
+       die(json_encode(['resultCode'=>6011,'error'=>$this->err['6011']]));
+	}
     /**
      * App视频上传
      * @param Request $request
