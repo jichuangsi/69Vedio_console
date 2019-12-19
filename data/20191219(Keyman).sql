@@ -1,0 +1,1 @@
+alter table `ms_comment` add `pid` int(11) default 0 COMMENT '父评论id';
