@@ -13,14 +13,14 @@ use think\Route;
 Route::domain('*','/');
 
 //Route::rule('share/:id','/share/share/number/:id');    //分享
-Route::rule('share/:id/:code','/app/download/u/:id/c/:code');    //分享
-
+//Route::rule('share/:id/:code','/app/download/u/:id/c/:code');    //分享
+Route::rule('share/:id','/app/download/u/:id');    //分享
 
 return [
     '__pattern__' => [
         'name' => '\w+',
-        'id'=>'\d+',
-        'code'=>'\d+'
+        'id'=>'\w+',
+        //'code'=>'\d+'
     ],
     '[hello]'     => [
         ':id'   => ['index/hello', ['method' => 'get'], ['id' => '\d+']],

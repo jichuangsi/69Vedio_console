@@ -122,7 +122,7 @@ class Geoservice extends Baseservice
         }
         
         if((time()*1000)-(intval($timestamp))>($this->locateTimeout*60*100)){
-            //die(json_encode(['resultCode' => 8004,'error' => $this->err['8004']]));
+            die(json_encode(['resultCode' => 8004,'error' => $this->err['8004']]));
         }
         
         //SN 认证
@@ -239,12 +239,13 @@ class Geoservice extends Baseservice
             //dump($members);
             
             foreach($members as &$v){
-                $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['uid']])->select();
+                $user = Db::name('member')->field('id,username,nickname,headimgurl')->where(['id'=>$v['uid']])->select();
                 if($user){
-                    $v['username'] = $user[0]['username'];
+                    $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
+                    $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                     $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
-                    $v['username'] = '未知用户';
+                    $v['username'] = $v['nickname'] = $this->default_user_name;
                     $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
                 
@@ -255,7 +256,9 @@ class Geoservice extends Baseservice
                 $cuser = Db::name('member_collection')->field('id,status')->where($map)->select();
                 if($cuser&&$cuser[0]){
                     $v['concerned'] = $cuser[0]['status'];
-                }                
+                }else{
+                    $v['concerned'] = null;
+                }
                 
                 array_push($returnData, $v);
             }

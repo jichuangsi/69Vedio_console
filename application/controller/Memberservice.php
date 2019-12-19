@@ -24,6 +24,7 @@ class Memberservice extends Baseservice
         '9005' => '关注用户失败',
         '9006' => '已经关注过该用户',
         '9007' => '取消关注用户失败',
+        '9008' => '指定用户不存在',
     ];
     
     /* private $member_id;
@@ -39,6 +40,8 @@ class Memberservice extends Baseservice
     private $default_user_avatar = '/tpl/default/app/static/images/user.png';
     
     private $authHeaders = ['multipart/form-data']; */
+    
+    private $share_link_pattern;
     
     public function __construct(Request $request)
     {
@@ -68,7 +71,9 @@ class Memberservice extends Baseservice
         
         parent::__construct($request);
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo'];
+        $this->share_link_pattern = $this->httpType.$_SERVER['HTTP_HOST']."/share/";
+        
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -174,7 +179,7 @@ class Memberservice extends Baseservice
         
         $ucount=Db::name('member')->where('id',$cid)->count();  //检查用户是否存在
         if($ucount<=0){
-            die(json_encode(['resultCode' => 9004, 'error' => $this->err['9004']]));
+            die(json_encode(['resultCode' => 9008, 'error' => $this->err['9008']]));
         }
         
         //检查是否已经关注
@@ -242,7 +247,7 @@ class Memberservice extends Baseservice
         
         $ucount=Db::name('member')->where('id',$cid)->count();  //检查用户是否存在
         if($ucount<=0){
-            die(json_encode(['resultCode' => 9004, 'error' => $this->err['9004']]));
+            die(json_encode(['resultCode' => 9008, 'error' => $this->err['9008']]));
         }
         
         //检查是否已经关注
@@ -407,6 +412,19 @@ class Memberservice extends Baseservice
         }
         
         die(json_encode(['resultCode' => 0,'message' => "获取推荐关注成功",'data' => $returnData]));
+    }
+    
+    /**
+     * 代理分享链接
+     * @param Request $request
+     */
+    public function sharelink(Request $request){
+        
+        $shareLink = $this->share_link_pattern.createUidCode($this->member_id);
+        
+        //dump($shareLink);
+        
+        die(json_encode(['resultCode' => 0,'message' => "生成代理分享链接成功",'data' => $shareLink]));
     }
     
     private function fetchMembers($param = null){

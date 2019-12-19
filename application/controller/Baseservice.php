@@ -31,6 +31,10 @@ class Baseservice extends Controller
     
     protected $default_user_avatar = '/tpl/default/app/static/images/user.png';
     
+    protected $default_user_name = '未知用户';
+    
+    protected $default_offical_name = '69官方';
+    
     public function __construct(Request $request)
     {        
         

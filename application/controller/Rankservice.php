@@ -98,15 +98,16 @@ class Rankservice extends Baseservice
                 
         foreach($goodmost as &$v){
             if($v['user_id']===0){
-                $v['username'] = '69官方';
+                $v['username'] = $v['nickname'] = $this->default_offical_name;
                 $v['headimgurl'] = $this->getDefaultUserAvater(true);
             }else{
-                $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['user_id']])->select();
+                $user = Db::name('member')->field('id,username,nickname,headimgurl')->where(['id'=>$v['user_id']])->select();
                 if($user){                    
-                    $v['username'] = $user[0]['username'];
+                    $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
+                    $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                     $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
-                    $v['username'] = '未知用户';
+                    $v['username'] = $v['nickname'] = $this->default_user_name;
                     $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
             }
@@ -115,12 +116,13 @@ class Rankservice extends Baseservice
         $invitemost = Db::name('member')->field('pid, count(id) as uids')->where('pid','GT', 0)->group('pid')->order('uids desc')->limit($limit2)->select();
         
         foreach($invitemost as &$v){
-            $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['pid']])->select();
+            $user = Db::name('member')->field('id,username,nickname,headimgurl')->where(['id'=>$v['pid']])->select();
             if($user){
-                $v['username'] = $user[0]['username'];
+                $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
+                $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                 $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
             }else{
-                $v['username'] = '未知用户';
+                $v['username'] = $v['nickname'] = $this->default_user_name;
                 $v['headimgurl'] = $this->getDefaultUserAvater();
             }
         }
@@ -129,15 +131,16 @@ class Rankservice extends Baseservice
         
         foreach($uploademost as &$v){
             if($v['user_id']===0){
-                $v['username'] = '69官方';
+                $v['username'] = $v['nickname'] = $this->default_offical_name;
                 $v['headimgurl'] = $this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
             }else{
-                $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['user_id']])->select();
+                $user = Db::name('member')->field('id,username,nickname,headimgurl')->where(['id'=>$v['user_id']])->select();
                 if($user){
-                    $v['username'] = $user[0]['username'];
+                    $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
+                    $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                     $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
-                    $v['username'] = '未知用户';
+                    $v['username'] = $v['nickname'] = $this->default_user_name;
                     $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
             }
@@ -171,12 +174,13 @@ class Rankservice extends Baseservice
         $returnData['total'] = $total;
         $returnData['members'] = array();
         foreach($members as &$v){
-            $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['pid']])->select();
+            $user = Db::name('member')->field('id,username,nickname,headimgurl')->where(['id'=>$v['pid']])->select();
             if($user){
-                $v['username'] = $user[0]['username'];
+                $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
+                $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                 $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
             }else{
-                $v['username'] = '未知用户';
+                $v['username'] = $v['nickname'] = $this->default_user_name;
                 $v['headimgurl'] = $this->getDefaultUserAvater();
             }
             
@@ -214,15 +218,16 @@ class Rankservice extends Baseservice
         $returnData['members'] = array();
         foreach($members as &$v){
             if($v['user_id']===0){
-                $v['username'] = '69官方';
+                $v['username'] = $v['nickname'] = $this->default_offical_name;
                 $v['headimgurl'] = $this->getDefaultUserAvater(true);
             }else{
-                $user = Db::name('member')->field('id,username,headimgurl')->where(['id'=>$v['user_id']])->select();
+                $user = Db::name('member')->field('id,username,nickname,headimgurl')->where(['id'=>$v['user_id']])->select();
                 if($user){
-                    $v['username'] = $user[0]['username'];
+                    $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
+                    $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                     $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
                 }else{
-                    $v['username'] = '未知用户';
+                    $v['username'] = $v['nickname'] = $this->default_user_name;
                     $v['headimgurl'] = $this->getDefaultUserAvater();
                 }
                 

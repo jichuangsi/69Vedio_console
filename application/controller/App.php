@@ -15,12 +15,12 @@ class App extends Controller{
     
     public function download(Request $request){
         
-        $uid = $request->param('u');
-        $code = $request->param('c');
+        $uid = $request->param('u');        
+        //$code = $request->param('c');
         //dump($uid);dump($code);exit;
         
         $this->assign('u', $uid);
-        $this->assign('c', $code);
+        //$this->assign('c', $code);
         return view();
     }
     

@@ -21,6 +21,8 @@ class Userservice extends Controller
         '5003' => '新用户注册失败',
         '5004' => '设备初始化失败',
         '5005' => '用户未登录',
+        '5006' => '邀请人信息为空',
+        '5007' => '邀请人信息异常',
     ];
     
     /* protected $middleware = ['CrossDomain'];
@@ -96,7 +98,7 @@ class Userservice extends Controller
         $map['gr'] = $gpu_renderer;
         $map['du'] = array('eq', '');
         $map['uid'] = array('eq', 0);
-        $user = Db::name('devices')->field('uid,code,puid')->where($map)->limit(1)->order("download_time DESC")->select();
+        $user = Db::name('devices')->field('uid,code,puid')->where($map)->limit(1)->order("download_time DESC, id DESC")->select();
         
         /* if($user&&$user[0]['uid']){            
             $this->fetchMember($user[0]['uid']);
@@ -132,8 +134,18 @@ class Userservice extends Controller
         $screen_pixelratio = $request->post('sp');
         $gpu_version = $request->post('gv');
         $gpu_renderer = $request->post('gr');
-        $puid = $request->post('uid');
-        $code = $request->post('code');
+        $uid = $request->post('uid');   
+        if(!$uid){
+            die(json_encode(['resultCode' => 5006, 'error' => $this->err['5006']]));
+        }
+        
+        $puid = deUidCode($uid);
+        $exist = Db::name('member')->where(['id'=>$puid])->count('id');
+        if(!$exist){
+            die(json_encode(['resultCode' => 5007, 'error' => $this->err['5007']]));            
+        }
+        //$code = $request->post('code');
+        $code = $this->generate_invite_code($puid);
         
         unset($devicedata);
         $devicedata['sw'] = $screen_width;
@@ -220,5 +232,48 @@ class Userservice extends Controller
             session('member_info', $sessionUserInfo);
         }
         
+    }
+    
+    /**
+     * 生成用户全局唯一邀请码
+     * @param $uid
+     * @return boolean|boolean|string
+     */
+    private function generate_invite_code($uid){
+        $code = false;
+        
+        if(!$uid) return false;
+        
+        while(true){
+            $code = $this->create_invite_code();
+            $exist = Db::name('devices')->where(['uid'=>$uid,'code'=>$code])->count('id');
+            if(!$exist){
+                break;
+            }
+        }
+        
+        return $code;
+    }
+    
+    private function create_invite_code() {
+        $code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $rand = $code[rand(0,25)]
+        .strtoupper(dechex(date('m')))
+        .date('d')
+        .substr(time(),-5)
+        .substr(microtime(),2,5)
+        .sprintf('%02d',rand(0,99));
+        for(
+            $a = md5( $rand, true ),
+            $s = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            $d = '',
+            $f = 0;
+            $f < 6;
+            $g = ord( $a[ $f ] ),
+            $d .= $s[ ( $g ^ ord( $a[ $f + 8 ] ) ) - $g & 0x1F ],
+            $f++
+            );
+        
+        return $d;
     }
 }

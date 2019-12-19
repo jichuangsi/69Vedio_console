@@ -273,7 +273,7 @@ class Videoservice extends Baseservice
         $videoData['thumbnail'] = $imgInfo['saveName'];
         $videoData['add_time'] = time();
         $videoData['update_time'] = time();
-        $videoData['user_id'] = 0;//$this->member_id;
+        $videoData['user_id'] = $this->member_id;
         $videoData['is_check'] =  (get_config('resource_examine_on')  == 1) ?  0 : 1;        
         
         $vid = Db::name('video')->insertGetId($videoData);
@@ -516,9 +516,13 @@ class Videoservice extends Baseservice
         $query = new Query();
         
         $query->name('video')->alias('v')
-                ->field('v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.headimgurl')
+                ->field('v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.nickname, m.headimgurl')
                 ->join('member m','v.user_id = m.id','LEFT');
         
+        if(get_config('resource_examine_on')){
+            $query->where(['is_check'=>1]);
+        }
+                
         if(isset($param['where'])&&!empty($param['where'])){
             $query->where($param['where']);
         }
@@ -546,13 +550,16 @@ class Videoservice extends Baseservice
             $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
             $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
             if($v['user_id']===0){
-                $v['username'] = '69官方';
+                $v['username'] = $v['nickname'] = $this->default_offical_name;
                 $v['headimgurl'] = $this->getDefaultUserAvater(true);//$this->httpType.$_SERVER['HTTP_HOST'].$this->default_app_avatar;
             }else{
                 if(!$v['headimgurl']) $v['headimgurl'] = $this->getDefaultUserAvater();
                 else $v['headimgurl'] = $this->getFullResourcePath($v['headimgurl'], $v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST'].str_replace('\\','/',$v['headimgurl']);
-                if(!$v['username']) $v['username'] = '未知用户';
-            }            
+                if(!$v['username']) $v['username'] = $this->default_user_name;
+                if(!$v['nickname']) $v['nickname'] = $v['username'];
+            }          
+            
+            $v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');
             
             array_push($returnData['videos'], $v);
         }

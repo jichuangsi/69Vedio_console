@@ -1494,6 +1494,122 @@ function get_user_wechat_openid($appid, $secretKey)
 }
 
 /**
+ * 防止跨站攻击
+ */
+function removeXss($val)
+{
+    $val = preg_replace('/([\x00-\x08][\x0b-\x0c][\x0e-\x20])/', '', $val);
+    
+    $search = 'abcdefghijklmnopqrstuvwxyz';
+    $search.= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $search.= '1234567890!@#$%^&*()';
+    $search.= '~`";:?+/={}[]-_|\'\\';
+    
+    for ($i = 0; $i < strlen($search); $i++) {
+        $val = preg_replace('/(&#[x|X]0{0,8}'.dechex(ord($search[$i])).';?)/i', $search[$i], $val);
+        $val = preg_replace('/(&#0{0,8}'.ord($search[$i]).';?)/', $search[$i], $val);
+    }
+    
+    $ra1 = array('javascript', 'vbscript', 'expression', 'applet', 'meta','blink', 'link',  'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound');
+    $ra2 = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint',
+        'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged',
+        'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange',
+        'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave',
+        'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize',
+        'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
+    $ra = array_merge($ra1, $ra2);
+    
+    $found = true;
+    while ($found == true) {
+        $val_before = $val;
+        for ($i = 0; $i < sizeof($ra); $i++) {
+            $pattern = '/';
+            for ($j = 0; $j < strlen($ra[$i]); $j++) {
+                if ($j > 0) {
+                    $pattern .= '(';
+                    $pattern .= '(&#[x|X]0{0,8}([9][a][b]);?)?';
+                    $pattern .= '|(&#0{0,8}([9][10][13]);?)?';
+                    $pattern .= ')?';
+                }
+                $pattern .= $ra[$i][$j];
+            }
+            $pattern .= '/i';
+            $replacement = substr($ra[$i], 0, 2).'<x>'.substr($ra[$i], 2);
+            $val = preg_replace($pattern, $replacement, $val);
+            if ($val_before == $val) {
+                $found = false;
+            }
+        }
+    }
+    return $val;
+}
+
+/**
+ * 时间格式化（时间戳） * 
+ */
+function uc_time_ago($ptime) {
+    date_default_timezone_set('PRC');
+    //$ptime = strtotime($ptime);
+    $etime = time() - $ptime;
+    switch ($etime){
+        case $etime <= 60:
+            $msg = '刚刚';
+            break;
+        case $etime > 60 && $etime <= 60 * 60:
+            $msg = floor($etime / 60) . ' 分钟前';
+            break;
+        case $etime > 60 * 60 && $etime <= 24 * 60 * 60:
+            $msg = date('Ymd',$ptime)==date('Ymd',time()) ? '今天 '.date('H:i',$ptime) : '昨天 '.date('H:i',$ptime);
+            break;
+        case $etime > 24 * 60 * 60 && $etime <= 2 * 24 * 60 * 60:
+            $msg = date('Ymd',$ptime)+1==date('Ymd',time()) ? '昨天 '.date('H:i',$ptime) : '前天 '.date('H:i',$ptime);
+            break;
+        case $etime > 2 * 24 * 60 * 60 && $etime <= 12 * 30 * 24 * 60 * 60:
+            $msg = date('Y',$ptime)==date('Y',time()) ? date('m-d H:i',$ptime) : date('Y-m-d H:i',$ptime);
+            break;
+        default: $msg = date('Y-m-d H:i',$ptime);
+    }
+    return $msg;
+}
+
+/**
+ * 对用户id编码用于分享
+ * @param string $user_id
+ * @return string
+ */
+function createUidCode($user_id) {
+    $source_string = config('uid_source_key');
+    $num = $user_id;
+    $code = '';
+    while ( $num > 0) {
+        $mod = $num % 35;
+        $num = ($num - $mod) / 35;
+        $code = $source_string[$mod].$code;
+    }
+    if(empty($code[3]))
+        $code = str_pad($code,4,'0',STR_PAD_LEFT);
+        return $code;
+}
+
+/**
+ * 对用户id解码用于分享
+ * @param string $code
+ * @return number
+ */
+function deUidCode($code) {
+    $source_string = config('uid_source_key');
+    if (strrpos($code, '0') !== false)
+        $code = substr($code, strrpos($code, '0')+1);
+        $len = strlen($code);
+        $code = strrev($code);
+        $num = 0;
+        for ($i=0; $i < $len; $i++) {
+            $num += strpos($source_string, $code[$i]) * pow(35, $i);
+        }
+        return $num;
+}
+
+/**
  * 通用第三方请求方法
  * @param string $url
  * @param array $data
