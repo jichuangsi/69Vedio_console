@@ -1,9 +1,16 @@
 {
-    "name": "administrator/msvodx_client",
-    "require": {
-        "qiniu/php-sdk": "^7.2",
-        "phpoffice/phpexcel": "^1.8",
-        "yansongda/pay": "^1.0",
-        "endroid/qr-code": "^2.5"
+	"name" : "administrator/msvodx_client",
+	"require" : {
+		"qiniu/php-sdk" : "^7.2",
+		"phpoffice/phpexcel" : "^1.8",
+		"yansongda/pay" : "^1.0",
+		"endroid/qr-code" : "^2.5",
+		"php-ffmpeg/php-ffmpeg": "^0.14.0"
+	},
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://php.cnpkg.org"
+        }
     }
 }

@@ -13,6 +13,8 @@ use think\Request;
 use think\Db;
 use think\Db\Query;
 
+//use app\common\FFMpegUtil;
+
 class Videoservice extends Baseservice
 {
     private $err = [
@@ -28,6 +30,8 @@ class Videoservice extends Baseservice
         '6010' => '视频点赞失败',
         '6011' => '取消点赞失败'
     ];
+    
+    private $video_length = 15;
     
     /* private $member_id;
     
@@ -251,6 +255,16 @@ class Videoservice extends Baseservice
                 $videoInfo['ext'] = $info->getExtension();
                 $videoInfo['saveName'] = $info->getSaveName();
                 $videoInfo['fileName'] = $info->getFilename();
+                
+                //生成预览
+                /* if($gold                                        //需要金币
+                        &&get_config('look_at_on')              //需要开放试看
+                        &&get_config('look_at_measurement')=='2'//试看以秒为单位
+                        &&intval(get_config('look_at_num'))<$this->video_length){//少于15秒试看
+                    $preview = FFMpegUtil::gen_video_preview($movePath.DS.$videoInfo['saveName']);
+                    $videoInfo['preview'] = str_replace($movePath.DS, '', $preview);
+                } */
+                
             }else{
                 $errInfo['videoErr'] = $video->getError();
             }
@@ -267,6 +281,7 @@ class Videoservice extends Baseservice
         if($class) $videoData['class'] = $class;
         else $videoData['class'] = 0;
         $videoData['url'] = $videoInfo['saveName'];
+        $videoData['preview'] = isset($videoInfo['preview'])?$videoInfo['preview']:null;
         $videoData['thumbnail'] = $imgInfo['saveName'];
         $videoData['add_time'] = time();
         $videoData['update_time'] = time();
@@ -512,7 +527,7 @@ class Videoservice extends Baseservice
         $query = new Query();
         
         $query->name('video')->alias('v')
-                ->field('v.id as id, v.title, v.url, v.thumbnail, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.nickname, m.headimgurl')
+                ->field('v.id as id, v.title, v.url, v.thumbnail, v.preview, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.nickname, m.headimgurl')
                 ->join('member m','v.user_id = m.id','LEFT');
         
         if(get_config('resource_examine_on')){
@@ -544,6 +559,7 @@ class Videoservice extends Baseservice
         $returnData['videos'] = array();
         foreach($videos as &$v){
             $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
+            $v['preview'] = $this->getFullResourcePath($v['preview'],$v['user_id']);
             $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
             if($v['user_id']===0){
                 $v['username'] = $v['nickname'] = $this->default_offical_name;
@@ -556,6 +572,14 @@ class Videoservice extends Baseservice
             }          
             
             $v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');
+            
+            if($v['gold']){//需要金币观看
+                $isbuy = Db::name('video_watch_log')->where(['video_id'=>$v['id'],'user_id'=>$this->member_id])->count('id');//是否已经购买
+                
+                if(!$isbuy&&$v['user_id']!=$this->member_id){//没有购买并且不是作者，则只能看预览
+                    $v['url'] = '';
+                }
+            }            
             
             array_push($returnData['videos'], $v);
         }

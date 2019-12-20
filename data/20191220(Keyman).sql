@@ -1,0 +1,1 @@
+alter table `ms_video` add `preview` varchar(255) DEFAULT NULL COMMENT '视频预览地址';

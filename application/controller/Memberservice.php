@@ -27,7 +27,14 @@ class Memberservice extends Baseservice
         '9008' => '指定用户不存在',
         '9009' => '该账号已存在',
         '9010' => '图片上传失败',
-        '9011' => '修改失败'
+        '9011' => '修改失败',
+        '9012' => '参数缺少视频id',
+        '9013' => '购买视频不存在',
+        '9014' => '视频作者不用购买',
+        '9015' => '该视频免费',
+        '9016' => '已经购买过该视频',
+        '9017' => '余额不够支付该视频所需金币',        
+        '9018' => '购买视频失败',
     ];
     
     /* private $member_id;
@@ -76,7 +83,7 @@ class Memberservice extends Baseservice
         
         $this->share_link_pattern = $this->httpType.$_SERVER['HTTP_HOST']."/share/";
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo'];
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -488,6 +495,77 @@ class Memberservice extends Baseservice
         }
         
         die(json_encode(['resultCode' => 0,'message' => "获取推荐关注成功",'data' => $returnData]));
+    }    
+    
+    /**
+     * 代理分享链接
+     * @param Request $request
+     */
+    public function sharelink(Request $request){
+        
+        $shareLink = $this->share_link_pattern.createUidCode($this->member_id);
+        
+        //dump($shareLink);
+        
+        die(json_encode(['resultCode' => 0,'message' => "生成代理分享链接成功",'data' => $shareLink]));
+    }
+    
+    /**
+     * 用户购买视频
+     * @param Request $request
+     * @return mixed
+     */
+    public function buyvideo(Request $request){
+        if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        
+        $vid = $request->param('vid/d', '');
+        
+        if(!$vid){
+            die(json_encode(['resultCode' => 9012, 'error' => $this->err['9012']]));
+        }
+        
+        $video = Db::name('video')->field('user_id,gold')->where(['id'=>$vid])->find();        
+        if(!$video){
+            die(json_encode(['resultCode' => 9013, 'error' => $this->err['9013']]));
+        }
+        
+        if($video['user_id']==$this->member_id){
+            die(json_encode(['resultCode' => 9014, 'error' => $this->err['9014']]));
+        }
+        
+        if($video['gold']===0){
+            die(json_encode(['resultCode' => 9015, 'error' => $this->err['9015']]));
+        }
+        
+        $isbuy = Db::name('video_watch_log')->where(['video_id'=>$vid, 'user_id'=>$this->member_id])->count('id');        
+        if($isbuy){
+            die(json_encode(['resultCode' => 9016, 'error' => $this->err['9016']]));
+        }
+        
+        $canbuy = Db::name('member')->field('id')->where(['id'=>$this->member_id,'money'=>['>=',$video['gold']]])->find();        
+        if(!$canbuy){
+            die(json_encode(['resultCode' => 9017, 'error' => $this->err['9017']]));
+        }
+        
+        unset($data);
+        $data['video_id'] = $vid;
+        $data['user_id'] = $this->member_id;
+        $data['user_ip'] = $request->ip();
+        $data['gold'] = $video['gold'];
+        $data['view_time'] = time();
+        
+        $ret = Db::transaction(function() use($data){            
+            Db::name('video_watch_log')->insertGetId($data);
+            Db::name('member')->where(['id'=>$data['user_id']])->setDec('money', $data['gold']);
+        });
+        
+        if(!$ret){
+            die(json_encode(['resultCode' => 0,'message' => "购买视频成功",'data' => $ret]));
+        }else{
+            die(json_encode(['resultCode' => 9018,'error' => $this->err['9018']]));
+        }
     }
     
     /*
@@ -512,18 +590,6 @@ class Memberservice extends Baseservice
     	}else{
     		return null;
     	}
-    }
-    /**
-     * 代理分享链接
-     * @param Request $request
-     */
-    public function sharelink(Request $request){
-        
-        $shareLink = $this->share_link_pattern.createUidCode($this->member_id);
-        
-        //dump($shareLink);
-        
-        die(json_encode(['resultCode' => 0,'message' => "生成代理分享链接成功",'data' => $shareLink]));
     }
     
     private function fetchMembers($param = null){
