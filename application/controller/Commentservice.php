@@ -66,7 +66,7 @@ class Commentservice extends Baseservice
         
         parent::__construct($request);
         
-        $noAuthAct = ['getcomments','submitcomment','mycomments','mygoods']; 
+        $noAuthAct = ['getcomments','submitcomment','mycomments','mygoods','getnotice']; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -314,7 +314,16 @@ class Commentservice extends Baseservice
         
         die(json_encode(['resultCode' => 0,'message' => "获取我的评论列表成功",'data' => $returnData]));
     }
-    
+    /**
+     *获取系统信息列表 
+     */
+    public function getnotice(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $notice=Db::name('notice')->field('id,title,content')->where('status',1)->order('sort desc')->select();
+        die(json_encode(['resultCode' => 0,'message' => "获取系统信息列表成功",'data' => $notice]));
+    }
     /**
      * 获取我的点赞列表
      * @param Request $request

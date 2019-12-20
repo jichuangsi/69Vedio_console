@@ -120,6 +120,8 @@ class Videoservice extends Baseservice
 //      		$videos['videos'][$k]['headimgurl']='require("'.$val['headimgurl'].'")';
 //      		$videos['videos'][$k]['thumbnail']='require("'.$val['thumbnail'].'")';
         	}
+        }else{
+        	$videos['videos']=array();
         }
         die(json_encode(['resultCode' => 0,'message' => '获取推荐视频成功','data' => $videos]));
     }
@@ -154,12 +156,16 @@ class Videoservice extends Baseservice
         	'add_time'=>$time
         ];
         //添加点赞记录并返回记录id
-        $vcresult=Db::name('video_good_log')->insertGetId($vcdata);
-        $rs=DB::query("update ms_video set good=good+1 where id=$vid");
-        if($vcresult>0){
-        	die(json_encode(['resultCode' => 0,'message' => '点赞视频成功','data' => $vcresult]));
+         $ret = Db::transaction(function() use($vcdata, $vid){
+            	Db::name('video_good_log')->insertGetId($vcdata);
+   				DB::query("update ms_video set good=good+1 where id=$vid");
+         });
+        if(!$ret){
+        	die(json_encode(['resultCode' => 0,'message' => '点赞视频成功','data' => $ret]));
+        }else{
+        	die(json_encode(['resultCode'=>6010,'error'=>$this->err['6010']]));
         }
-       die(json_encode(['resultCode'=>6010,'error'=>$this->err['6010']]));
+       
     }
     /*
      * 取消视频点赞
@@ -186,12 +192,16 @@ class Videoservice extends Baseservice
         	'user_id'=>$uid,
         	'video_id'=>$vid,
         ];
-        $vcresult=Db::query("delete from ms_video_good_log where user_id=$uid and video_id=$vid");
-        $rs=DB::query("update ms_video set good=good-1 where id=$vid");
-        if($vcresult>0){
-        	die(json_encode(['resultCode' => 0,'message' => '取消点赞成功','data' => $vcresult]));
+        $ret = Db::transaction(function() use($vcdata, $vid,$uid){
+                	Db::query("delete from ms_video_good_log where user_id=$uid and video_id=$vid");
+   					DB::query("update ms_video set good=good-1 where id=$vid");
+        });
+        if(!$ret){
+        	die(json_encode(['resultCode' => 0,'message' => '取消点赞成功','data' => $ret]));
+        }else{
+        	die(json_encode(['resultCode'=>6011,'error'=>$this->err['6011']]));
         }
-       die(json_encode(['resultCode'=>6011,'error'=>$this->err['6011']]));
+       
 	}
     /**
      * App视频上传
@@ -468,7 +478,9 @@ class Videoservice extends Baseservice
             
             $returnData = $this->fetchVideos($param);
         }
-        
+        if(!$returnData){
+        	$returnData['videos']=array();
+        }
         die(json_encode(['resultCode' => 0,'message' => "获取关注人视频成功",'data' => $returnData]));
     }
     

@@ -35,6 +35,7 @@ class Memberservice extends Baseservice
         '9016' => '已经购买过该视频',
         '9017' => '余额不够支付该视频所需金币',        
         '9018' => '购买视频失败',
+        '9019' => '移除粉丝失败'
     ];
     
     /* private $member_id;
@@ -166,21 +167,79 @@ class Memberservice extends Baseservice
         $member=Db::name('member')->field('*')->where('id',$uid)->select();
         $member[0]['headimgurl']?$this->getFullResourcePath($member[0]['headimgurl'], $member[0]['id']):$this->getDefaultUserAvater();
        	$member[0]['concerned']=$this->checkisfollow($this->member_id,$uid);//判断是否已经关注
+       	$member[0]['year']=$this->datediffage($member[0]['birthday']);//用户岁数
+       	$member[0]['fansnum']=Db::name('member_collection')->where(['cid'=>$uid])->count('id');//用户粉丝数
+       	$member[0]['follownum']=Db::name('member_collection')->where(['uid'=>$uid])->count('id');//用户关注数
+       	$member[0]['fabulous']=Db::name('video')->where('user_id',$uid)->sum('good');        //获取用户被点赞数
+       	$member[0]['birthday']=date('Y-m-s',$member[0]['birthday']);//转换生日
+       	//获取用户地区名
+       	if($member[0]['region']!=0){
+       		$distr=Db::name('district')->field('name')->where('id',$member[0]['region'])->select();
+       		$member[0]['regionname']=$distr[0]['name'];
+       	}else{
+       		$member[0]['regionname']='中国';
+       	}
         die(json_encode(['resultCode' => 0,'message' => '获取个人信息成功','data' => $member[0]]));
     }
-    /**
+    /*
+     * 获取岁数
+     */
+    function datediffage($before) {
+    	$after=time();
+		 if ($before>$after) {
+		  $b = getdate($after);
+		  $a = getdate($before);
+		 }
+		 else {
+		  $b = getdate($before);
+		  $a = getdate($after);
+		 }
+		 $n = array(1=>31,2=>28,3=>31,4=>30,5=>31,6=>30,7=>31,8=>31,9=>30,10=>31,11=>30,12=>31);
+		 $y=$m=$d=0;
+		 if ($a['mday']>=$b['mday']) { //天相减为正
+		  if ($a['mon']>=$b['mon']) {//月相减为正
+		   $y=$a['year']-$b['year'];$m=$a['mon']-$b['mon'];
+		  }
+		  else { //月相减为负，借年
+		   $y=$a['year']-$b['year']-1;$m=$a['mon']-$b['mon']+12;
+		  }
+		  $d=$a['mday']-$b['mday'];
+		 }
+		 else {  //天相减为负，借月
+		  if ($a['mon']==1) { //1月，借年
+		   $y=$a['year']-$b['year']-1;$m=$a['mon']-$b['mon']+12;$d=$a['mday']-$b['mday']+$n[12];
+		  }
+		  else {
+		   if ($a['mon']==3) { //3月，判断闰年取得2月天数
+		    $d=$a['mday']-$b['mday']+($a['year']%4==0?29:28);
+		   }
+		   else {
+		    $d=$a['mday']-$b['mday']+$n[$a['mon']-1];
+		   }
+		   if ($a['mon']>=$b['mon']+1) { //借月后，月相减为正
+		    $y=$a['year']-$b['year'];$m=$a['mon']-$b['mon']-1;
+		   }
+		   else { //借月后，月相减为负，借年
+		    $y=$a['year']-$b['year']-1;$m=$a['mon']-$b['mon']+12-1;
+		   }
+		  }
+		 }
+		 return $y;
+//		 return ($y==0?'':$y.'岁').($m==0?'':$m.'个月').($d==0?'':$d.'天');
+	}
+   /**
      * 编辑个人用户信息 
      */
     public function editmemberinfo(Request $request){
-    	if (strtoupper($request->method()) == "OPTIONS") {
-            return Response::create()->send();
-        }
-        $uid   = $this->member_id;
+//  	if (strtoupper($request->method()) == "OPTIONS") {
+//          return Response::create()->send();
+//      }
+        $uid   =  $this->member_id;
         $uname = $request->post('username');
         $nname = $request->post('nickname');
         $introduce = $request->post('introduce')?$request->post('introduce'):'';
         $sex = $request->post('sex')?$request->post('sex'):1;
-        $birthday = $request->post('birthday')?strtotime($request->post('birthday')):0;
+        $birthday = $request->post('birthday')?strtotime($request->post('birthday')):time();
         $img = $request->file('fileimg');
         $region = $request->post('region')?$request->post('region'):0; 
          //判断账号是否已存在
@@ -390,7 +449,7 @@ class Memberservice extends Baseservice
         
         unset($where);
         $where['c.uid'] = $this->member_id;
-        $where['c.status'] = 0;
+//      $where['c.status'] = 0;
         
         unset($join);
         $join['table'] = 'member m';
@@ -419,7 +478,7 @@ class Memberservice extends Baseservice
         
         unset($where);
         $where['c.cid'] = $this->member_id;
-        $where['c.status'] = 0;
+//      $where['c.status'] = 0;
         
         unset($join);
         $join['table'] = 'member m';
@@ -436,7 +495,28 @@ class Memberservice extends Baseservice
         }
         die(json_encode(['resultCode' => 0,'message' => "获取粉丝列表成功",'data' => $concerneds]));
     }
-    
+    /*
+     * 移除粉丝
+     */
+    public function removeconcerneds(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid = $this->member_id;
+        $cid = $request->post('cid')?$request->post('cid'):0;
+        
+        unset($cdata);
+        $cdata['uid'] = $cid;
+        $cdata['cid'] = $uid;
+        $ret = Db::transaction(function() use($cdata){
+                Db::name('member_collection')->where($cdata)->delete();
+            });
+        if(!$ret){
+            die(json_encode(['resultCode' => 0,'message' => "移除粉丝成功",'data' => $ret]));
+        }else{
+            die(json_encode(['resultCode' => 9019,'error' => $this->err['9019']]));
+        }
+    }
     /**
      * 推荐关注列表
      * @param Request $request

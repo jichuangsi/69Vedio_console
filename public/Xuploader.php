@@ -45,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 // Settings
 //$targetDir = ini_get("upload_tmp_dir") . DIRECTORY_SEPARATOR . "plupload";
 date_default_timezone_set('PRC');
-$baseDir= "XResource".DIRECTORY_SEPARATOR.date('Ymd');
+//$baseDir= "XResource".DIRECTORY_SEPARATOR.date('Ymd');
+$baseDir= "uploads".DIRECTORY_SEPARATOR.date('Ymd');
 $targetDir = dirname(__FILE__). DIRECTORY_SEPARATOR .$baseDir;
 
 $cleanupTargetDir = true; // Remove old files
