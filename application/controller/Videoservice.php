@@ -203,7 +203,7 @@ class Videoservice extends Baseservice
         $video = $request->file('filevideo'); 
         
         unset($videoData);
-        $videoData['title'] = $title;
+        $videoData['title'] = removeXss($title);
         $videoData['accept'] = $accept;
         $rule = [
             //'title|视频标题' => 'require|min:8|max:20',

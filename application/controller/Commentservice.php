@@ -66,7 +66,7 @@ class Commentservice extends Baseservice
         
         parent::__construct($request);
         
-        $noAuthAct = ['getcomments','submitcomment','mycomments']; 
+        $noAuthAct = ['getcomments','submitcomment','mycomments','mygoods']; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -278,7 +278,7 @@ class Commentservice extends Baseservice
             $commentslist = Db::name('comment')->alias('c')->field('c.id as cid, c.content, c.add_time, c.resources_id as vid,
                                 s.id as sid, s.username as susername, s.nickname as snickname, s.headimgurl as sheadimgurl,
                                 t.id as tid, t.username as tusername, t.nickname as tnickname, t.headimgurl as theadimgurl,
-                                v.user_id, v.thumbnail, v.url')
+                                v.user_id, v.thumbnail, v.url, v.title')
                                 ->join("video v",'c.resources_id = v.id','RIGHT')
                                 ->join('member s','c.send_user = s.id','LEFT')
                                 ->join("member t", "t.id = c.to_user", "LEFT")                                
@@ -314,5 +314,65 @@ class Commentservice extends Baseservice
         
         die(json_encode(['resultCode' => 0,'message' => "获取我的评论列表成功",'data' => $returnData]));
     }
+    
+    /**
+     * 获取我的点赞列表
+     * @param Request $request
+     * @return mixed
+     */
+    public function mygoods(Request $request){
+        if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        
+        $resources_type = $request->param('rt/d', 1);//资源类型
+        $page = $request->param('page/d', 1);
+        $rows = $request->param('rows/d', $this->listRows);
+        
+        unset($map);
+        $map['v.user_id'] = $this->member_id;
+        if(get_config('resource_examine_on')){
+            $map['v.is_check'] = 1;
+        }
+        
+        $goodslist = Db::name('video')->alias('v')->field('v.id as vid, v.user_id, v.thumbnail, v.url, v.title, 
+                                l.id as lid, l.add_time,
+                                s.id as sid, s.username as susername, s.nickname as snickname, s.headimgurl as sheadimgurl,
+                                t.id as tid, t.username as tusername, t.nickname as tnickname, t.headimgurl as theadimgurl
+                        ')
+                        ->join('video_good_log l', 'l.video_id = v.id', 'RIGHT')                        
+                        ->join("member t", "v.user_id = t.id", "LEFT")
+                        ->join('member s','l.user_id = s.id','LEFT')
+                        ->where($map)
+                        ->order("l.add_time DESC")
+                        ->paginate(['page'=>$page, 'list_rows'=>$rows]);
+        
+        /* dump(Db::name('video')->getLastSql());
+        dump($goodslist); */        
+        
+        $goods = $goodslist->items();
+        $currentPage = $goodslist->currentPage();
+        $total = $goodslist->total();
+        
+        $returnData['currentPage'] = $currentPage;
+        $returnData['total'] = $total;
+        $returnData['goods'] = array();
+        
+        foreach($goods as &$v){
+            if(!$v['susername']) $v['susername'] = $this->default_user_name;
+            if(!$v['tusername']) $v['tusername'] = $this->default_user_name;
+            if(!$v['snickname']) $v['snickname'] = $v['susername'];
+            if(!$v['tnickname']) $v['tnickname'] = $v['tusername'];
+            $v['sheadimgurl'] = $v['sheadimgurl']?$this->getFullResourcePath($v['sheadimgurl'], $v['sid']):$this->getDefaultUserAvater();
+            $v['theadimgurl'] = $v['theadimgurl']?$this->getFullResourcePath($v['theadimgurl'], $v['tid']):$this->getDefaultUserAvater();
+            $v['add_time'] = uc_time_ago($v['add_time']);
+            $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);
+            $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);            
+            
+            array_push($returnData['goods'], $v);
+        }
+        
+        die(json_encode(['resultCode' => 0,'message' => "获取我的点赞列表成功",'data' => $returnData]));
+    }    
     
 }

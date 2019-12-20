@@ -201,9 +201,9 @@ class Memberservice extends Baseservice
         } 
         unset($update);
        	$update=[
-       		'username' => $uname,
-       		'nickname' => $nname,
-       		'introduce'=> $introduce,
+       	    'username' => removeXss($uname),
+       	    'nickname' => removeXss($nname),
+       	    'introduce'=> removeXss($introduce),
        		'sex'      => $sex,
        		'birthday' => $birthday,
        	];
