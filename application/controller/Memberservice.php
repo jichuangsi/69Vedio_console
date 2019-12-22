@@ -150,7 +150,8 @@ class Memberservice extends Baseservice
                 else $v['headimgurl'] = $this->getFullResourcePath($v['headimgurl'], $v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST'].str_replace('\\','/',$v['headimgurl']);
                 if(!$v['username']) $v['username'] = '未知用户';
             }     
-            $v['isgood']=DB::name('video_collection')->where(['user_id'=>$uid,'video_id'=>$v['id']])->count();       
+            $v['isgood']=DB::name('video_good_log')->where(['user_id'=>$uid,'video_id'=>$v['id']])->count();
+            $v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');       
             array_push($returnData['videos'], $v);
         }
         die(json_encode(['resultCode' => 0,'message' => '获取喜欢视频列表成功','data' => $returnData]));

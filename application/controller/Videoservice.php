@@ -115,7 +115,7 @@ class Videoservice extends Baseservice
         $videos=$this->fetchVideos($param);
         if(!empty($videos['videos'])){
         	foreach($videos['videos'] as $k=>$val){
-				$videos['videos'][$k]['isgood']=DB::name('video_collection')->where(['user_id'=>$uid,'video_id'=>$val['id']])->count();        		
+				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$uid,'video_id'=>$val['id']])->count();        		
 //      		$videos['videos'][$k]['url']='require("'.$val['url'].'")';
 //      		$videos['videos'][$k]['headimgurl']='require("'.$val['headimgurl'].'")';
 //      		$videos['videos'][$k]['thumbnail']='require("'.$val['thumbnail'].'")';
@@ -322,8 +322,15 @@ class Videoservice extends Baseservice
         $param['where'] = ['user_id'=>$this->member_id];
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
         $param['order'] = 'add_time desc';
-        
-        die(json_encode(['resultCode' => 0,'message' => "获取我的上传成功",'data' => $this->fetchVideos($param)]));
+        $videos=$this->fetchVideos($param);
+        if(!empty($videos['videos'])){
+        	foreach($videos['videos'] as $k=>$val){
+				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$val['id']])->count();        		
+        	}
+        }else{
+        	$videos['videos']=array();
+        }
+        die(json_encode(['resultCode' => 0,'message' => "获取我的上传成功",'data' => $videos]));
         
         /* $videos = Db::name('video')
                     ->field('id, title, url, thumbnail, add_time, good, click, tag, status, hint, is_check')

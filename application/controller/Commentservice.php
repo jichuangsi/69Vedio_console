@@ -130,10 +130,12 @@ class Commentservice extends Baseservice
        $comments = $commentslist->items();
        $currentPage = $commentslist->currentPage();
        $total = $commentslist->total();
+       $hasMore=$commentslist->hasPages();
        
        $returnData['currentPage'] = $currentPage;
        $returnData['total'] = $total;
        $returnData['comments'] = array();
+       $returnData['hasmore'] = $hasMore;  //是否有下一页
        
        foreach($comments as &$v){           
            if(!$v['susername']) $v['susername'] = $this->default_user_name;
@@ -193,7 +195,7 @@ class Commentservice extends Baseservice
         $tid = $request->param('tid/d', 0);//接受人id
         $resources_type = $request->param('rt/d', 1);//资源类型
         $content = $request->param('content/s', '');//评论内容
-        $sid = $this->member_id;//发送人id
+        $sid =$this->member_id;//发送人id
         
         if(!$vid){
             die(json_encode(['resultCode' => 10003, 'error' => $this->err['10003']]));
@@ -249,7 +251,7 @@ class Commentservice extends Baseservice
         $rows = $request->param('rows/d', $this->listRows);
         
         unset($map);
-        $map['v.user_id'] = $this->member_id;
+        $map['v.user_id'] =$this->member_id;
         $map['resources_type'] = $resources_type;
         if(get_config('comment_examine_on')){
             $map['c.status'] = 1;
@@ -275,10 +277,10 @@ class Commentservice extends Baseservice
             unset($map);
             $map['c.id'] = ['IN', $cids];
             
-            $commentslist = Db::name('comment')->alias('c')->field('c.id as cid, c.content, c.add_time, c.resources_id as vid,
+            $commentslist = Db::name('comment')->alias('c')->field('c.id as cid, c.content, c.add_time, c.resources_id as vid,c.pid as cpid,
                                 s.id as sid, s.username as susername, s.nickname as snickname, s.headimgurl as sheadimgurl,
                                 t.id as tid, t.username as tusername, t.nickname as tnickname, t.headimgurl as theadimgurl,
-                                v.user_id, v.thumbnail, v.url, v.title')
+                                v.user_id, v.thumbnail, v.url, v.title,v.good,v.id as id')
                                 ->join("video v",'c.resources_id = v.id','RIGHT')
                                 ->join('member s','c.send_user = s.id','LEFT')
                                 ->join("member t", "t.id = c.to_user", "LEFT")                                
@@ -308,6 +310,9 @@ class Commentservice extends Baseservice
                 $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);
                 $v['type'] = $v['user_id']==$this->member_id?1:2;//评论类型；1:评论自己作品，2:评论自己评论
                 
+                $v['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$v['id']])->count('id');      
+            	$v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');
+                
                 array_push($returnData['comments'], $v);
             }
         }
@@ -321,7 +326,12 @@ class Commentservice extends Baseservice
     	if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-        $notice=Db::name('notice')->field('id,title,content')->where('status',1)->order('sort desc')->select();
+        $notice=Db::name('notice')->field('id,title,content,add_time')->where('status',1)->order('sort desc')->select();
+        foreach($notice as $k=>$v){
+        	if($notice[$k]['add_time']!==0){
+        		$notice[$k]['add_time']=date('Y-m-d',$v['add_time']);
+        	}
+        }
         die(json_encode(['resultCode' => 0,'message' => "获取系统信息列表成功",'data' => $notice]));
     }
     /**
@@ -339,12 +349,12 @@ class Commentservice extends Baseservice
         $rows = $request->param('rows/d', $this->listRows);
         
         unset($map);
-        $map['v.user_id'] = $this->member_id;
+        $map['v.user_id'] =$this->member_id;
         if(get_config('resource_examine_on')){
             $map['v.is_check'] = 1;
         }
         
-        $goodslist = Db::name('video')->alias('v')->field('v.id as vid, v.user_id, v.thumbnail, v.url, v.title, 
+        $goodslist = Db::name('video')->alias('v')->field('v.id as id, v.user_id, v.thumbnail, v.url, v.title,v.good, 
                                 l.id as lid, l.add_time,
                                 s.id as sid, s.username as susername, s.nickname as snickname, s.headimgurl as sheadimgurl,
                                 t.id as tid, t.username as tusername, t.nickname as tnickname, t.headimgurl as theadimgurl
@@ -374,9 +384,14 @@ class Commentservice extends Baseservice
             if(!$v['tnickname']) $v['tnickname'] = $v['tusername'];
             $v['sheadimgurl'] = $v['sheadimgurl']?$this->getFullResourcePath($v['sheadimgurl'], $v['sid']):$this->getDefaultUserAvater();
             $v['theadimgurl'] = $v['theadimgurl']?$this->getFullResourcePath($v['theadimgurl'], $v['tid']):$this->getDefaultUserAvater();
-            $v['add_time'] = uc_time_ago($v['add_time']);
+//          $v['add_time'] = uc_time_ago($v['add_time']);
             $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);
-            $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);            
+            $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);   
+            
+            $v['add_time'] = date('Y-m-d',$v['add_time']);
+            $v['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$v['id']])->count('id');      
+            $v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');
+            
             
             array_push($returnData['goods'], $v);
         }

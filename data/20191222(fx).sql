@@ -1,0 +1,1 @@
+alter table `ms_notice` add `add_time` int(11) DEFAULT 0 COMMENT '添加时间';

@@ -206,7 +206,7 @@ class Rankservice extends Baseservice
         $page = $request->post('page')?$request->post('page'):1;
         $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
         
-        $uploademost = Db::name('video')->field('user_id, count(id) as vids')->group('user_id')->order('vids desc')
+        $uploademost = Db::name('video')->field('user_id, count(id) as vids')->where(['user_id'=>['<>',0]])->group('user_id')->order('vids desc')
                                         ->paginate(['page'=>$page, 'list_rows'=>$rows]);
         
         $members = $uploademost->items();
