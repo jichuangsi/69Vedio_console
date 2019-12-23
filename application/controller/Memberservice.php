@@ -157,6 +157,10 @@ class Memberservice extends Baseservice
             }     
             $v['isgood']=DB::name('video_good_log')->where(['user_id'=>$uid,'video_id'=>$v['id']])->count();
             $v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');       
+            
+            $taglist=explode(',',$v['tag']);
+			$v['tags']=Db::name('tag')->field('id,name')->where(['id'=>['IN',$taglist]])->select();
+            
             array_push($returnData['videos'], $v);
         }
         die(json_encode(['resultCode' => 0,'message' => '获取喜欢视频列表成功','data' => $returnData]));

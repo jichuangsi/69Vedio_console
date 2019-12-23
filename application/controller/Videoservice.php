@@ -76,7 +76,7 @@ class Videoservice extends Baseservice
         parent::__construct($request);
         
         $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection',
-            'concernvideos','cancelcollection'
+            'concernvideos','cancelcollection','videosearch','mybuyvideos'
         ]; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
@@ -125,6 +125,39 @@ class Videoservice extends Baseservice
         }
         die(json_encode(['resultCode' => 0,'message' => '获取推荐视频成功','data' => $videos]));
     }
+    
+    /**
+     *视频搜索 
+     */
+    public function videosearch(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $keyword=$request->post('k');
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        
+        unset($param);
+        $taglist=Db::name('tag')->field('id')->where(['type' => 1,'status' => 1,'name'=>['like',"%$keyword%"]])->select();
+		
+		$param['taglist']=$taglist;
+        $param['where'] =['v.title' => ['like',"%$keyword%"]];
+        $param['pager'] = array('page'=>$page, 'rows'=>$rows);
+        $param['order'] = 'add_time desc';
+        $videos=$this->fetchVideos($param);
+        if(!empty($videos['videos'])){
+        	foreach($videos['videos'] as $k=>$val){
+				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$val['id']])->count();        		
+        	}
+        }else{
+        	$videos['videos']=array();
+        }
+        
+//      $videos['taglist']=$taglist;
+        $videos['keyword']=$keyword;
+        die(json_encode(['resultCode' => 0,'message' => '获取搜索视频成功','data' => $videos]));
+    }
+    
     /*
      * 点赞视频
      */
@@ -308,6 +341,42 @@ class Videoservice extends Baseservice
     }
     
     /**
+     *我购买的视频 
+     */
+    public function mybuyvideos(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        
+        $uid=161;//$this->member_id;
+        
+        unset($join);
+        $join['table'] = 'video_watch_log vwl';
+        $join['on'] = 'vwl.video_id = v.id';
+        $join['type'] = 'RIGHT';
+        
+        unset($param);
+        $param['where'] = ['vwl.user_id'=>$uid];
+        $param['pager'] = array('page'=>$page, 'rows'=>$rows);
+        $param['order'] = 'vwl.view_time desc';
+        $param['join']  = $join;
+        
+        $videos=$this->fetchVideos($param);
+        
+        if(!empty($videos['videos'])){
+        	foreach($videos['videos'] as $k=>$val){
+				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$val['id']])->count();        		
+        	}
+        }else{
+        	$videos['videos']=array();
+        }
+        die(json_encode(['resultCode' => 0,'message' => '获取我的购买视频成功','data' => $videos]));
+    }
+    
+    /**
           * 我的视频
      * @param Request $request
      */
@@ -317,9 +386,9 @@ class Videoservice extends Baseservice
         }
         $page = $request->post('page')?$request->post('page'):1;
         $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
-        
+        $uid  = $request->post('uid')?$request->post('uid'):$this->member_id;
         unset($param);
-        $param['where'] = ['user_id'=>$this->member_id];
+        $param['where'] = ['user_id'=>$uid];
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
         $param['order'] = 'add_time desc';
         $videos=$this->fetchVideos($param);
@@ -549,12 +618,22 @@ class Videoservice extends Baseservice
                 ->field('v.id as id, v.title, v.url, v.thumbnail, v.preview, v.add_time, v.good, v.gold, v.click, v.tag, v.status, v.hint, v.is_check, v.user_id, m.username, m.nickname, m.headimgurl')
                 ->join('member m','v.user_id = m.id','LEFT');
         
+        if(isset($param['join'])&&!empty($param['join'])){
+            $query->join($param['join']['table'],$param['join']['on'],$param['join']['type']);
+        }
+        
         if(get_config('resource_examine_on')){
             $query->where(['is_check'=>1]);
         }
                 
         if(isset($param['where'])&&!empty($param['where'])){
             $query->where($param['where']);
+        }
+        
+        if(isset($param['taglist'])&&!empty($param['taglist'])){
+        	foreach($param['taglist'] as $v){
+        		$query->whereOr(['v.tag'=>['like','%'.$v['id'].'%']]);
+        	}
         }
         
         if(isset($param['order'])&&!empty($param['order'])){
@@ -589,6 +668,10 @@ class Videoservice extends Baseservice
                 if(!$v['username']) $v['username'] = $this->default_user_name;
                 if(!$v['nickname']) $v['nickname'] = $v['username'];
             }          
+            
+             $v['add_time']=date('Y-m-d',$v['add_time']);
+			$taglist=explode(',',$v['tag']);
+			$v['tags']=Db::name('tag')->field('id,name')->where(['id'=>['IN',$taglist]])->select();
             
             $v['comment'] = Db::name('comment')->where(['resources_type'=>1,'resources_id'=>$v['id']])->count('id');
             
