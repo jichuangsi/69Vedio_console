@@ -203,6 +203,7 @@ class Userservice extends Controller
         $userdata['sex']=1;
         $userdata['birthday']=time();
         if($puid) $userdata['pid']=$puid;
+        $userdata['try_and_see']=(get_config('look_at_on')  == 1) ?  get_config('look_at_num_mobile') : 0; 
         
         $uid=Db::name('member')->insertGetId($userdata);
         
@@ -210,6 +211,8 @@ class Userservice extends Controller
             $sessionUserInfo = [
                 'userid' => $uid,
                 'username' => $userdata['username'],
+                'money' => 0,
+                'usertype' => 1,
             ];
             session('member_id', $uid);
             session('member_info', $sessionUserInfo);
@@ -222,12 +225,14 @@ class Userservice extends Controller
         
         if(!$uid) return;
         
-        $user = Db::name('member')->field('id,username')->where(['id'=>$uid])->select();
+        $user = Db::name('member')->field('id,username,money,gid')->where(['id'=>$uid])->select();
         
         if($user){
             $sessionUserInfo = [
                 'userid' => $uid,
                 'username' => $user[0]['username'],
+                'money' => $user[0]['money'],
+                'usertype' => $user[0]['gid'],//1:为普通会员；2为vip会员
             ];
             session('member_id', $uid);
             session('member_info', $sessionUserInfo);

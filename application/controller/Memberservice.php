@@ -35,7 +35,12 @@ class Memberservice extends Baseservice
         '9016' => '已经购买过该视频',
         '9017' => '余额不够支付该视频所需金币',        
         '9018' => '购买视频失败',
-        '9019' => '移除粉丝失败'
+        '9019' => '移除粉丝失败',
+        '9020' => '用户为vip试看不限次',
+        '9021' => '视频作者不统计试看次数',        
+        '9022' => '试看次数已用完',
+        '9023' => '会员观看视频失败',
+        '9024' => '该视频不为免费',
     ];
     
     /* private $member_id;
@@ -84,7 +89,7 @@ class Memberservice extends Baseservice
         
         $this->share_link_pattern = $this->httpType.$_SERVER['HTTP_HOST']."/share/";
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo'];
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo','tryandsee'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -607,7 +612,7 @@ class Memberservice extends Baseservice
             die(json_encode(['resultCode' => 9012, 'error' => $this->err['9012']]));
         }
         
-        $video = Db::name('video')->field('user_id,gold')->where(['id'=>$vid])->find();        
+        $video = Db::name('video')->field('user_id,gold,url')->where(['id'=>$vid])->find();        
         if(!$video){
             die(json_encode(['resultCode' => 9013, 'error' => $this->err['9013']]));
         }
@@ -643,9 +648,65 @@ class Memberservice extends Baseservice
         });
         
         if(!$ret){
-            die(json_encode(['resultCode' => 0,'message' => "购买视频成功",'data' => $ret]));
+            die(json_encode(['resultCode' => 0,'message' => "购买视频成功",'data' => $this->getFullResourcePath($video['url'],$video['user_id'])]));
         }else{
             die(json_encode(['resultCode' => 9018,'error' => $this->err['9018']]));
+        }
+    }
+    
+    /**
+     * 会员观看视频记录
+     * @param Request $request
+     * @return mixed
+     */
+    public function tryandsee(Request $request){
+        if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        
+        $vid = $request->param('vid/d', '');
+        
+        if(!$vid){
+            die(json_encode(['resultCode' => 9012, 'error' => $this->err['9012']]));
+        }
+        
+        $user = Db::name('member')->field('gid,try_and_see')->where(['id'=>$this->member_id])->find();
+        if($user['try_and_see']===0){
+            die(json_encode(['resultCode' => 9022, 'error' => $this->err['9022']]));
+        }
+        
+        $video = Db::name('video')->field('user_id,gold')->where(['id'=>$vid])->find();
+        if(!$video){
+            die(json_encode(['resultCode' => 9013, 'error' => $this->err['9013']]));
+        }
+        
+        if($video['user_id']==$this->member_id){
+            die(json_encode(['resultCode' => 9021, 'error' => $this->err['9021']]));
+        }
+        
+        unset($data);
+        $data['video_id'] = $vid;
+        $data['user_id'] = $this->member_id;
+        $data['user_ip'] = $request->ip();
+        $data['try_time'] = time();
+        $gid = $user['gid'];
+        $isbuy = false;
+        if($video['gold']>0){
+            $isbuy = Db::name('video_watch_log')->where(['video_id'=>$vid, 'user_id'=>$this->member_id])->count('id');            
+        }
+        
+        $ret = Db::transaction(function() use($data, $gid, $isbuy){
+            Db::name('video_try_log')->insertGetId($data);
+            Db::name('video')->where(['id'=>$data['video_id']])->setInc('click');        
+            if($gid===1&&!$isbuy){
+                Db::name('member')->where(['id'=>$data['user_id']])->setDec('try_and_see');                
+            }            
+        });
+            
+        if(!$ret){
+            die(json_encode(['resultCode' => 0,'message' => "会员观看视频成功",'data' => $ret]));
+        }else{
+            die(json_encode(['resultCode' => 9023,'error' => $this->err['9023']]));
         }
     }
     

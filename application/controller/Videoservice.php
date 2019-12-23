@@ -13,7 +13,7 @@ use think\Request;
 use think\Db;
 use think\Db\Query;
 
-//use app\common\FFMpegUtil;
+use app\common\FFMpegUtil;
 
 class Videoservice extends Baseservice
 {
@@ -267,13 +267,13 @@ class Videoservice extends Baseservice
                 $videoInfo['fileName'] = $info->getFilename();
                 
                 //生成预览
-                /* if($gold                                        //需要金币
+                if($gold                                        //需要金币
                         &&get_config('look_at_on')              //需要开放试看
                         &&get_config('look_at_measurement')=='2'//试看以秒为单位
                         &&intval(get_config('look_at_num'))<$this->video_length){//少于15秒试看
                     $preview = FFMpegUtil::gen_video_preview($movePath.DS.$videoInfo['saveName']);
                     $videoInfo['preview'] = str_replace($movePath.DS, '', $preview);
-                } */
+                }
                 
             }else{
                 $errInfo['videoErr'] = $video->getError();

@@ -12,6 +12,7 @@
 // [ 应用入口文件 ]
 header("Content-Type:text/html; charset=utf-8");
 header('Access-Control-Allow-Origin:*');
+header('Access-Control-Allow-Headers: *');
 
 // 定义应用目录
 define('APP_PATH', __DIR__ . '/../application/');
