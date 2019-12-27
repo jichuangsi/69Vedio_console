@@ -12,7 +12,8 @@
         </div>
 
         <div class="layui-form-item">
-            <label class="layui-form-label"><b>PC</b>计量单位</label>
+            <!-- <label class="layui-form-label"><b>PC</b>计量单位</label> -->
+            <label class="layui-form-label"><b>收费视频</b>试看计量单位</label>
             <div class="layui-input-inline">
                 <select name="look_at_measurement" class="field-role_id" type="select"  name="look_at_measurement"  lay-skin="switch" lay-filter="look_at_measurement"  >
                     <option value="1" {if condition="$config['look_at_measurement'] eq 1"}selected=""{/if}>部</option>
@@ -22,19 +23,22 @@
         </div>
 
         <div class="layui-form-item">
-            <label class="layui-form-label" id="look_at_num"><b>PC</b>试看{if condition="$config['look_at_measurement'] eq 1"}部{else}秒{/if}数</label>
+            <!-- <label class="layui-form-label" id="look_at_num"><b>PC</b>试看{if condition="$config['look_at_measurement'] eq 1"}部{else}秒{/if}数</label> -->
+            <label class="layui-form-label" id="look_at_num"><b>收费视频</b>试看{if condition="$config['look_at_measurement'] eq 1"}部{else}秒{/if}数</label>
             <div class="layui-input-inline">
                 <input type="number"  class="layui-input" name="look_at_num" value="{$config['look_at_num']}" autocomplete="off" placeholder="请填写可试看数量">
             </div>
-            <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >{if condition="$config['look_at_measurement'] eq 1"}可试看的部数，如可试看1部，则填写1{else}每部可试看多少秒，如可试看30秒，则填写30{/if}</div>
+            <!-- <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >{if condition="$config['look_at_measurement'] eq 1"}可试看的部数，如可试看1部，则填写1{else}每部可试看多少秒，如可试看30秒，则填写30{/if}</div> -->
+            <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >{if condition="$config['look_at_measurement'] eq 1"}可试看的部数，如可试看1部，则填写1{else}每部可试看多少秒，如可试看5秒，则填写5（不能超过15秒）{/if}</div>
         </div>
 
         <div class="layui-form-item">
-            <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label>
+            <!-- <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label> -->
+            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数</label>
             <div class="layui-input-inline">
                 <input type="number"  class="layui-input" name="look_at_num_mobile" value="{$config['look_at_num_mobile']}" autocomplete="off" placeholder="请填写可试看数量">
             </div>
-            <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >防止UC手机端非法浏览VIP资源，故手机端单独设置</div>
+            <!-- <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >防止UC手机端非法浏览VIP资源，故手机端单独设置</div> -->
         </div>
 
         <div class="layui-form-item">
