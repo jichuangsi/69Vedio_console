@@ -120,6 +120,17 @@ return [
     'request_cache_except'   => [],
     //用户id转码key
     'uid_source_key' => 'E5FCDG3HQA4B1NOPIJ2RSTUV67MWX89KLYZ',
+    //应用id
+    'app_key'       =>  '69video',
+    //ftp url
+    'ftp_url'       =>  'b.aff69.cc',
+    //ftp父目录
+    'ftp_parent_folder'=>   'upload',
+    //公用功能接口
+    'common_service'    =>  [
+        'url'   =>  'http://127.0.0.1:88',
+        'preview_api'   =>  '/api/Job/actionWithVideoPreviewJob',
+    ],
     // +----------------------------------------------------------------------
     // | 模板设置
     // +----------------------------------------------------------------------

@@ -14,6 +14,7 @@ use think\Db;
 use think\Db\Query;
 
 use app\common\FFMpegUtil;
+use app\jobs\Jobs;
 
 class Videoservice extends Baseservice
 {
@@ -32,6 +33,14 @@ class Videoservice extends Baseservice
     ];
     
     private $video_length = 15;
+    
+    private $video_cover_size = 1048576*5;
+    
+    private $video_cover_ext = 'jpg,png,gif';
+    
+    private $video_default_size = 1048576*30;
+    
+    private $video_default_ext = 'mp4';
     
     /* private $member_id;
     
@@ -76,7 +85,7 @@ class Videoservice extends Baseservice
         parent::__construct($request);
         
         $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection',
-            'concernvideos','cancelcollection','videosearch','mybuyvideos'
+            'concernvideos','cancelcollection','videosearch','mybuyvideos','ftp','preview'
         ]; 
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
@@ -94,6 +103,38 @@ class Videoservice extends Baseservice
         $returnData = ['statusCode' => 6002, 'error' => $this->err['6002']];
         die(json_encode($returnData));
     }    
+    
+    /**
+     * ftp上传例子
+     * @param Request $request
+     */
+    private function ftp(Request $request){
+        
+        $s = $request->param('s/s','');
+        
+        $ret = ftp_upload($s);
+        
+        if($ret){
+            die(json_encode(['resultCode' => $ret['code'],'message' => $ret['msg']]));
+        }else{
+            die(json_encode(['resultCode' => -1,'message' => '未知错误']));
+        }        
+    }
+    
+    /**
+     * 远程预览服务例子
+     * @param Request $request
+     */
+    private function preview(Request $request){
+        $s = $request->param('s/s','');
+        
+        $p = str_replace(str_replace(DS, '/', ROOT_PATH) . 'public/uploads', config('app_key'), $s);
+        
+        $data = ['p'=>$p];
+        $result = json_decode(curl("http://192.168.31.108:73/api/Job/actionWithVideoPreviewJob", $data));
+        
+        dump($result);
+    }
     
     /*
      * 首页推荐视频
@@ -281,11 +322,12 @@ class Videoservice extends Baseservice
         }
         if($img){
             unset($info);
-            $info = $img->validate(['size'=>1048576,'ext'=>'jpg,png,gif'])->move($movePath);
+            $info = $img->validate(['size'=>$this->video_cover_size,'ext'=>$this->video_cover_ext])->move($movePath);
             if($info){
                 $imgInfo['ext'] = $info->getExtension();
                 $imgInfo['saveName'] = $info->getSaveName();
                 $imgInfo['fileName'] = $info->getFilename();
+                $imgInfo['pathName'] = $info->getPathname();
             }else{
                 $errInfo['imgErr'] = $img->getError();
             }
@@ -293,20 +335,20 @@ class Videoservice extends Baseservice
         
         if($video){
             unset($info);
-            $info = $video->validate(['size'=>31457280,'ext'=>'mp4'])->move($movePath);//需要同时更改php.ini的post_max_size = 30M 
+            $info = $video->validate(['size'=>$this->video_default_size,'ext'=>$this->video_default_ext])->move($movePath);//需要同时更改php.ini的post_max_size = 30M 
             if($info){
                 $videoInfo['ext'] = $info->getExtension();
                 $videoInfo['saveName'] = $info->getSaveName();
                 $videoInfo['fileName'] = $info->getFilename();
-                
+                $videoInfo['pathName'] = $info->getPathname();
                 //生成预览
-                if($gold                                        //需要金币
+                /* if($gold                                        //需要金币
                         &&get_config('look_at_on')              //需要开放试看
                         &&get_config('look_at_measurement')=='2'//试看以秒为单位
                         &&intval(get_config('look_at_num'))<$this->video_length){//少于15秒试看
                     $preview = FFMpegUtil::gen_video_preview($movePath.DS.$videoInfo['saveName']);
                     $videoInfo['preview'] = str_replace($movePath.DS, '', $preview);
-                }
+                } */
                 
             }else{
                 $errInfo['videoErr'] = $video->getError();
@@ -334,6 +376,38 @@ class Videoservice extends Baseservice
         $vid = Db::name('video')->insertGetId($videoData);
         
         if($vid){
+            
+            //视频图片上传ftp
+            /* if(file_exists($imgInfo['pathName'])){
+                Jobs::actionWithFtpUploadJob(['path'=>$imgInfo['pathName']]);
+            }
+            if(file_exists($videoInfo['pathName'])){
+                $preview = false;
+                //生成预览
+                if($gold                                        //需要金币
+                     &&get_config('look_at_on')              //需要开放试看
+                     &&get_config('look_at_measurement')=='2'//试看以秒为单位
+                     &&intval(get_config('look_at_num'))<$this->video_length){//少于15秒试看
+                    $preview = true;
+                 }
+                 Jobs::actionWithFtpUploadJob(['path'=>$videoInfo['pathName'],'preview'=>$preview]);
+            } */
+            //视频预览
+            if($gold                                        //需要金币
+                &&get_config('look_at_on')              //需要开放试看
+                &&get_config('look_at_measurement')=='2'//试看以秒为单位
+                &&intval(get_config('look_at_num'))<$this->video_length){//少于15秒试看                                        
+                    $data = [
+                        'p'=>str_replace(ROOT_PATH.'public'.DS.'uploads'.DS, '', $videoInfo['pathName']),
+                        'v'=>$vid,
+                        's'=>get_config('look_at_num'),
+                        'callbackurl'=>$this->httpType.$_SERVER['HTTP_HOST'].'/Callbackservice/preivewnotifyurl',//回调url
+                        'callbackmethod'=>'POST'//回调方法，暂时只有POST和GET
+                    ];
+                    $result = json_decode(curl(config('common_service.url').config('common_service.preview_api'), $data, 'POST'));
+                    //dump($result);
+            }            
+            
             die(json_encode(['resultCode' => 0,'message' => "视频上传成功",'data' => ['vid'=>$vid]]));
         }else{
             die(json_encode(['resultCode' => 6006,'error' => $this->err['6006']]));

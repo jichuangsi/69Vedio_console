@@ -1664,3 +1664,142 @@ function curl($url = '', $data = array(), $method = 'GET', $second = 30) {
         return $error;
     }
 }
+
+/**
+ * ftp上传方法
+ * @param string $url
+ * @param array $data
+ * @param string $method
+ * @param number $second
+ * @return boolean|mixed|json
+ */
+function ftp_upload($s){
+    
+    $info = pathinfo(str_replace(DS, '/', $s));
+    $dirs =  explode('/', str_replace(str_replace(DS, '/', ROOT_PATH) . 'public/uploads/', '', $info['dirname'])); 
+    
+    $conn = ftp_connect(config('ftp_url'));//连接ftp
+    if(!$conn){
+        return ['code' => -1,'msg' => 'connect ftp fail'];
+    }
+    
+    $login = ftp_login($conn,null,null);//登录ftp
+    if(!$login){
+        return ['code' => -2,'msg' => 'login ftp fail'];
+    }
+    
+    $uf = ftp_chdir($conn,config('ftp_parent_folder'));//检查上传文件夹
+    if(!$uf){
+        return ['code' => -3,'msg' => 'upload folder is not existed'];
+    }
+    
+    $afs = ftp_nlist($conn,".");//检查app上传文件夹
+    if(!in_array("./".config('app_key'), $afs)){
+        $fm = ftp_mkdir($conn,config('app_key'));
+        if(!$fm){
+            return ['code' => -4,'msg' => 'app folder create fail'];
+        }
+    }
+    $af = ftp_chdir($conn,config('app_key'));
+    if(!$af){
+        return ['code' => -5,'msg' => 'app folder switch fail'];
+    }
+    
+    $cf = true;
+    foreach($dirs as $v){//检查用户上传文件夹
+        $ufs = ftp_nlist($conn,".");
+        if(!in_array('./'.$v, $ufs)){
+            $fm = ftp_mkdir($conn,$v);
+            if(!$fm){
+                $cf = false;
+                break;
+            }
+        }
+        $uf = ftp_chdir($conn,$v);
+        if(!$uf){
+            $cf = false;
+            break;
+        }
+    }
+    
+    if(!$cf){
+        return ['code' => -6,'msg' => 'user folder locate fail'];
+    }
+    
+    $ufs = ftp_nlist($conn,".");//检查文件是否存在
+    if(in_array('./'.$info['basename'], $ufs)){
+        return ['code' => -7,'msg' => 'file is existed'];
+    }
+    
+   /*  $fa = ftp_alloc($conn,filesize($s));//分配文件空间
+    if(!$fa){
+        return ['code' => -8,'msg' => 'allocate file fail'];
+    }  */   
+    $fp = fopen($s,'r');//传输文件
+    // 初始化上传
+    $ret = ftp_nb_fput($conn, $info['basename'], $fp, FTP_BINARY);
+    while ($ret == FTP_MOREDATA) {
+        // 继续上传...
+        $ret = ftp_nb_continue($conn);
+    }
+    
+    fclose($fp);
+    ftp_close($conn);   
+    
+    if ($ret == FTP_FINISHED) {
+        return ['code' => 0,'msg' => 'file upload successful']; 
+    }else{
+        return ['code' => -9,'msg' => 'file transfer fail'];
+    }
+}
+
+/* function ftp($s){
+    //把本地文件上传到ftp服务器上    
+    $curl = curl_init(); 
+    
+    //指定待上传的文件并以只读方式打开    
+    $localfile = $s;
+    
+    $fp = fopen($localfile,'r'); 
+    
+    $info = pathinfo(str_replace(DS, '/', $s));
+    
+    //设置上传的url,     ftpfile.jpeg我没事先创建，上传成功了    
+    //curl_setopt($curl, CURLOPT_URL, "ftp://103.244.89.38/upload/69video/".str_replace(str_replace(DS, '/', ROOT_PATH).'public/uploads/', '', $info['dirname']).'/'.$info['basename']);
+    curl_setopt($curl, CURLOPT_URL, "ftp://103.244.89.38/upload/69video/".$info['basename']);
+    
+    //设置返回结果中不含头信息    
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    
+    //设置返回结果不直接打印出来    
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    
+    //设置上传超时时间    
+    curl_setopt($curl, CURLOPT_TIMEOUT, 300);
+    
+    //设置用户密码    
+    //curl_setopt($curl, CURLOPT_USERPWD, ":");   
+    
+    
+    //设置上传的一些参数
+    
+    //告诉curl是上传操作    
+    curl_setopt($curl, CURLOPT_UPLOAD, 1);
+    
+    //设置上传的文件的流指针    
+    curl_setopt($curl, CURLOPT_INFILE, $fp);
+    
+    //告诉curl上传文件的大小，方便计算上传进度等    
+    curl_setopt($curl, CURLOPT_INFILESIZE, filesize($localfile));
+    
+    $output = curl_exec($curl);
+    fclose($fp);
+    
+    if(!curl_errno($curl)){        
+        echo "upload successfully";        
+    }else{        
+        echo '错误：' . curl_error($curl);        
+    }
+    
+    curl_close($curl);    
+} */
