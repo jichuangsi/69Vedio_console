@@ -253,13 +253,11 @@ class Geoservice extends Baseservice
                     $v['username'] = $user[0]['username']?$user[0]['username']:$this->default_user_name;
                     $v['nickname'] = $user[0]['nickname']?$user[0]['nickname']:$v['username'];
                     $v['headimgurl'] = $user[0]['headimgurl']?$this->getFullResourcePath($user[0]['headimgurl'], $user[0]['id']):$this->getDefaultUserAvater();
-               		$v['sex']=$user[0]['sex'];
                 }else{
                     $v['username'] = $v['nickname'] = $this->default_user_name;
                     $v['headimgurl'] = $this->getDefaultUserAvater();
-               		$v['sex']=$user[0]['sex'];
                 }
-                
+                $v['sex']=$user[0]['sex']?$user[0]['sex']:1;
                 //检查是否关注,0为已关注，1为互关，null为没关注
                 unset($map);
                 $map['uid'] = $this->member_id;
