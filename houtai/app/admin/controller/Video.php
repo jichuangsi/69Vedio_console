@@ -16,6 +16,7 @@ class Video extends Admin
     public function videocheck(Request $request){
         $videodb=$this->myDb->name('video');
         $class=$this->myDb->name('class');
+        $member=$this->myDb->name('member');
         $select=$request->get('select/d',1);
         $key=$request->get('key/s','');
         $cla=$request->get('class/d',0);
@@ -53,7 +54,12 @@ class Video extends Admin
         foreach ($list['data'] as $k=>$v){
             $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],1);
             if( $list['data'][$k]['user_id']==0){
+            	$list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail']);
                 $list['data'][$k]['user_id']='admin';
+            }else{
+            	$username=$member->where(['id'=>$list['data'][$k]['user_id']])->select();
+            	$list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail'],$list['data'][$k]['user_id']);
+            	$list['data'][$k]['user_id']=$username[0]['nickname'];
             }
         }
         $classlist=$class->where(['type'=>1,'pid'=>0])->select();

@@ -96,7 +96,9 @@ class Admin extends Common
             $this->assign('languages', model('AdminLanguage')->lists());
         }
     }
-	
+	/*
+	 * 获取图片全路径
+	 */
 	protected function getFronturl($path='', $uid=''){
 		if(!$path) return null;
         

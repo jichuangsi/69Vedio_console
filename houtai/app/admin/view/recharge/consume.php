@@ -33,8 +33,8 @@
                 {$vo['id']}
                 </td>
                 <td class="font12">
-                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl">
-                    <p class="ml10 fl"><strong class="mcolor">昵称：{$vo['nickname']} </strong><br>手机：{$vo['tel']}<br>邮箱：{$vo['email']}</p>
+                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl" onerror="this.src='__ADMIN_IMG__/avatar.png'">
+                    <p class="ml10 fl">昵称：<strong class="mcolor">{$vo['nickname']} </strong></p>
                 </td>
                 <td class="font12">{$vo['gold']}</td>
                 <td class="font12">

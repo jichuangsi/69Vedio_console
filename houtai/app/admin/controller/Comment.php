@@ -28,14 +28,14 @@ class Comment extends Admin
                 'title' => '视频评论',
                 'url' => 'admin/comment/index?types=video',
             ],
-            [
-                'title' => '图片评论',
-                'url' => 'admin/comment/index?types=image',
-            ],
-            [
-                'title' => '资讯评论',
-                'url' => 'admin/comment/index?types=novel',
-            ],
+//          [
+//              'title' => '图片评论',
+//              'url' => 'admin/comment/index?types=image',
+//          ],
+//          [
+//              'title' => '资讯评论',
+//              'url' => 'admin/comment/index?types=novel',
+//          ],
         ];
         $this->assign('tab_type', 1);
         $this->tab_data = $tab_data;
@@ -55,7 +55,7 @@ class Comment extends Admin
             'novel' => 3,
         );
         $where = 'resources_type ='.$resources_type_value[$type];
-        $order = 'last_time desc';
+        $order = 'status asc,last_time desc';
         $list = $this->myDb->view('Comment')
             ->view('member','username','ms_comment.send_user=member.id','LEFT')
             ->view($type,'title','ms_comment.resources_id='.$type.'.id','LEFT')

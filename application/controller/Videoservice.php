@@ -425,7 +425,7 @@ class Videoservice extends Baseservice
         $page = $request->post('page')?$request->post('page'):1;
         $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
         
-        $uid=161;//$this->member_id;
+        $uid=$this->member_id;
         
         unset($join);
         $join['table'] = 'video_watch_log vwl';

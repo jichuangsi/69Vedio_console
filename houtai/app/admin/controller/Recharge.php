@@ -73,10 +73,15 @@ class Recharge extends Admin
             ->where("{$table}_watch_log.gold!=0")
             ->order('view_time','desc')
             ->paginate(20);
+            
+        $list=$data_list->toArray();
+        foreach($list['data'] as $k=>$v){
+			$list['data'][$k]['headimgurl']=$this->getFronturl($v['headimgurl'],$v['user_id']);
+        }
         $pages=$data_list->render();
         $this->assign('pages',$pages);
         $this->assign('title',$title);
-        $this->assign('data_list',$data_list);
+        $this->assign('data_list',$list['data']);
         return $this->fetch();
     }
     /**
