@@ -16,10 +16,10 @@
             <tr>
                 <th><input type="checkbox" lay-skin="primary" lay-filter="allChoose"></th>
                 <th>ID</th>
-                <th>标题</th>
+                <th width="110">标题</th>
                 <th>内容</th>
-                <th width="80">展示方式</th>
-                <th width="100">过期时间</th>
+                <!--<th width="80">展示方式</th>-->
+                <th width="130">添加时间</th>
                 <th width="40">排序</th>
                 <th>状态</th>
                 <th width="100">操作</th>
@@ -32,8 +32,8 @@
                 <td>{$vo['id']}</td>
                 <td>{$vo['title']}</td>
                 <td>{if condition="$vo['type'] eq 1"}{$vo['content']}{else/}{$vo['url']}{/if} </td>
-                <td> {if condition="$vo['type'] eq 1"}弹出层显示{else/}网页转跳{/if} </td>
-                <td>{:date('Y-m-d H:i:s',$vo['out_time'])}</td>
+                <!--<td> {if condition="$vo['type'] eq 1"}弹出层显示{else/}网页转跳{/if} </td>-->
+                <td>{:date('Y-m-d H:i:s',$vo['add_time'])}</td>
                 <td>{$vo['sort']}</td>
                 <td>
                     <input type="checkbox"  {if condition="$vo['status'] eq 1"}checked=""{/if} value="{$vo['status']}" lay-skin="switch" lay-filter="switchStatus" lay-text="正常|关闭" data-href="{:url('khstatus?table=notice&ids='.$vo['id'])}">

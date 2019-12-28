@@ -293,7 +293,7 @@ class Index extends Admin
         $viewNovelMonthListMonth = array();
         $viewNovelMonthListCount = array();
 
-        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m') months,sum(gold) count FROM `ms_Novel` GROUP BY months");
+        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m') months,sum(gold) count FROM `ms_novel` GROUP BY months");
         foreach ($userarr as $row) {
             //$row = array_map('addslashes', $row);			
             //implode("', '", $row)

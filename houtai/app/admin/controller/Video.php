@@ -472,7 +472,11 @@ class Video extends Admin
         foreach ($classlist as $k=>$v){
             $classlist[$k]['childs']=$class->where(['pid'=>$v['id']])->select();
         }
-
+		if($videoinfo['user_id']==0){
+			$videoinfo['imgview'] = $this->getFronturl($videoinfo['thumbnail']);
+		}else{
+			$videoinfo['imgview'] = $this->getFronturl($videoinfo['thumbnail'],$videoinfo['user_id']);
+		}
         //视频标签
         $tag_result=$tag->where(['type'=>1,'status'=>1])->select();
         $this->assign('classlist',$classlist);
@@ -489,6 +493,7 @@ class Video extends Admin
     function lists(Request $request){
         $videodb=$this->myDb->name('video');
         $class=$this->myDb->name('class');
+        $member=$this->myDb->name('member');
          $select=$request->get('select/d',1);
          $key=$request->get('key/s','');
          $cla=$request->get('class/d',0);
@@ -533,6 +538,12 @@ class Video extends Admin
           //  $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],1);
             if( $list['data'][$k]['user_id']==0){
                 $list['data'][$k]['user_id']='admin';
+                $list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail']);
+            }else{
+            	$username=$member->where(['id'=>$list['data'][$k]['user_id']])->select();
+            	$list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail'],$list['data'][$k]['user_id']);
+//				$list['data'][$k]['thumbnail'] =$this->getFronturl()."/uploads/".$list['data'][$k]['user_id']."/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
+            	$list['data'][$k]['user_id']=$username[0]['nickname'];
             }
         }
         $classlist=$class->where(['type'=>1,'pid'=>0])->select();
@@ -626,6 +637,11 @@ class Video extends Admin
         $yzmPlayKey=$this->myDb->name('admin_config')->where("name='yzm_play_secretkey'")->find();
         $yzmPlayKey=(isset($yzmPlayKey['value']))?$yzmPlayKey['value']:'';
         $yzmPlayKey=create_yzm_play_sign($yzmPlayKey);
+        if($videoInfo['user_id']==0){
+        	$videoInfo['url']=$this->getFronturl($videoInfo['url']);
+        }else{
+        	$videoInfo['url']=$this->getFronturl($videoInfo['url'],$videoInfo['user_id']);
+        }
         $videoInfo['url'].="?sign={$yzmPlayKey}";
 
         $this->assign('videoInfo',$videoInfo);

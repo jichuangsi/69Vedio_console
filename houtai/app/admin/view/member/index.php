@@ -5,7 +5,7 @@
 </style>
 <div class="page-toolbar" style="overflow: visible">
     <div class="layui-btn-group fl">
-        <a href="{:url('add')}" class="layui-btn layui-btn-primary"><i class="aicon ai-tianjia"></i>添加</a>
+        <!--<a href="{:url('add')}" class="layui-btn layui-btn-primary"><i class="aicon ai-tianjia"></i>添加</a>-->
         <a data-href="{:url('status?table=member&val=1')}" class="layui-btn layui-btn-primary j-page-btns"><i class="aicon ai-qiyong"></i>启用</a>
         <a data-href="{:url('status?table=member&val=0')}" class="layui-btn layui-btn-primary j-page-btns"><i class="aicon ai-jinyong1"></i>禁用</a>
         <a data-href="{:url('del?table=member')}" class="layui-btn layui-btn-primary j-page-btns confirm"><i class="aicon ai-jinyong"></i>删除</a>
@@ -25,8 +25,8 @@
                 <div class="layui-input-inline layui-form">
                     <select name="key" lay-verify="">
                         <option value="nickname" {if condition="$keys eq 'nickname'"}selected="selected"{/if}>昵称</option>
-                        <option value="tel" {if condition="$keys eq 'tel'"}selected="selected"{/if} >手机号</option>
-                        <option value="email" {if condition="$keys eq 'email'"}selected="selected"{/if}>邮箱</option>
+                        <!--<option value="tel" {if condition="$keys eq 'tel'"}selected="selected"{/if} >手机号</option>
+                        <option value="email" {if condition="$keys eq 'email'"}selected="selected"{/if}>邮箱</option>-->
                     </select>
                 </div>
                 <div class="layui-input-inline">
@@ -49,8 +49,8 @@
                 <th>会员</th>
                 <th>会员类型</th>
                 <th>金币</th>
-                <th>注册&登陆</th>
-                <th>代理商</th>
+                <th>注册时间</th>
+                <!--<th>代理商</th>-->
                 <th>状态</th>
                 <th>操作</th>
             </tr> 
@@ -61,12 +61,13 @@
                 <td><input type="checkbox" name="ids[]" class="layui-checkbox checkbox-ids" value="{$vo['id']}" lay-skin="primary"></td>
                 <td class="font12">
                     <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl">
-                    <p class="ml10 fl">{$vo['nickname']} &nbsp; ({$vo['username']})<br>手机：{$vo['tel']|default="-"}<br>邮箱：{$vo['email']}</p>
+                    <!--<p class="ml10 fl">{$vo['nickname']} &nbsp; ({$vo['username']})<br>手机：{$vo['tel']|default="-"}<br>邮箱：{$vo['email']}</p>-->
+                    <p class="ml10 fl">{$vo['nickname']} </p>
                 </td>
                 <td class="font12">{if $vo['is_permanent']==1}永久VIP{elseif $vo['out_time']>time()}VIP{else/}普通用户{/if}</td>
                 <td class="font12">余额：{$vo['money']}</td>
-                <td class="font12">注册：{:date('Y-m-d H:i:s', $vo['add_time'])}<br>登陆：{:date('Y-m-d H:i:s', $vo['last_time'])}</td>
-                <td><input type="checkbox" name="is_agent" {if condition="$vo['is_agent'] eq 1"}checked=""{/if} value="{$vo['is_agent']}" lay-skin="switch" lay-filter="switchStatus" lay-text="是|否" data-href="{:url('isAgent?ids='.$vo['id'])}"></td>
+                <td class="font12">{:date('Y-m-d H:i:s', $vo['add_time'])}</td>
+                <!--<td><input type="checkbox" name="is_agent" {if condition="$vo['is_agent'] eq 1"}checked=""{/if} value="{$vo['is_agent']}" lay-skin="switch" lay-filter="switchStatus" lay-text="是|否" data-href="{:url('isAgent?ids='.$vo['id'])}"></td>-->
                 <td><input type="checkbox" name="status" {if condition="$vo['status'] eq 1"}checked=""{/if} value="{$vo['status']}" lay-skin="switch" lay-filter="switchStatus" lay-text="正常|关闭" data-href="{:url('status?table=member&ids='.$vo['id'])}"></td>
                 <td>
                     <div class="layui-btn-group">

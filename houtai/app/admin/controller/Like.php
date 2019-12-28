@@ -43,7 +43,7 @@ class Like extends Admin
                      $where.=" and video.title like '%{$key}%' ";
                      break;
                  case 3:
-                     $where.=" and member.username like  '%{$key}%'";
+                     $where.=" and member.nickname like  '%{$key}%'";
                      break;
                  default :
                      $where.=" and 1=1";
@@ -62,7 +62,7 @@ class Like extends Admin
         $data_list=$this->myDb->view('video','id,title,info,key_word,update_time,click,good,thumbnail,user_id,status,is_check,sort,type,gold,recommend')
             ->view('class','name as class','video.class=class.id and class.type=1')
             ->view('video_good_log','add_time,id as vcid','video.id=video_good_log.video_id')
-            ->view('member','username','video_good_log.user_id=member.id')
+            ->view('member','username,nickname','video_good_log.user_id=member.id')
             ->where($where)->order("add_time",'desc')->cache(120)->paginate(null,false,['query'=>$request->get()]);
 
         $list=$data_list->toArray();
@@ -71,14 +71,15 @@ class Like extends Admin
         foreach ($list['data'] as $k=>$v){
           //  $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],1);
             if($list['data'][$k]['user_id']==0){
-            	$list['data'][$k]['thumbnail'] ="http://192.168.31.122:96".$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
+//          	$list['data'][$k]['thumbnail'] =$this->getFronturl().$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
+                $list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail']);
                 $list['data'][$k]['user_id']='admin';
                 
             }else{
             	$username=$member->where(['id'=>$list['data'][$k]['user_id']])->select();
-//          	$list['data'][$k]['thumbnail'] =$this->get_http_type().$_SERVER['HTTP_HOST']."/uploads/".$list['data'][$k]['user_id']."/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
-				$list['data'][$k]['thumbnail'] ="http://192.168.31.122:96"."/uploads/".$list['data'][$k]['user_id']."/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
-            	$list['data'][$k]['user_id']=$username[0]['username'];
+            	$list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail'],$list['data'][$k]['user_id']);
+//				$list['data'][$k]['thumbnail'] =$this->getFronturl()."/uploads/".$list['data'][$k]['user_id']."/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
+            	$list['data'][$k]['user_id']=$username[0]['nickname'];
             }
         }
         $classlist=$class->where(['type'=>1,'pid'=>0])->select();

@@ -4,21 +4,21 @@
             <legend>网站设置</legend>
         </fieldset>
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">网站状态</label>
             <div class="layui-input-inline">
                 <input type="checkbox" name="site_status"  lay-skin="switch" lay-text="开启|关闭" {if condition="$config['site_status'] eq 1"}checked=""{/if}>
             </div>
             <div class="layui-form-mid layui-word-aux">站点关闭后客户界面将不能访问</div>
-        </div>
+        </div>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item" >
             <label class="layui-form-label">手机网站</label>
             <div class="layui-input-inline">
                 <input type="checkbox" name="wap_site_status" lay-skin="switch" lay-text="开启|关闭" {if condition="$config['wap_site_status'] eq 1"}checked=""{/if}>
             </div>
             <div class="layui-form-mid layui-word-aux">如果有手机网站，请设置为开启状态，否则只显示PC网站</div>
-        </div>
+        </div>-->
 
         <!--<div class="layui-form-item">
             <label class="layui-form-label">是否开启伪静态</label>
@@ -28,7 +28,7 @@
             <div class="layui-form-mid layui-word-aux">开启的情况下，可以支持html等后缀的访问形式</div>
         </div>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">网站LOGO</label>
             <div class="layui-input-inline upload">
                 <button type="button" name="upload" class="layui-btn layui-btn-primary layui-upload"  id="upload_logo_chose_btn"">{if condition="empty($config['site_logo'])"}请上传网站Logo{else}更改Logo{/if}</button>
@@ -36,9 +36,9 @@
                 <img src="{$config['site_logo']}" id="img_logo" onmouseover="imgTips(this,{width:400,className:'imgTips',bgColor:'#fff'})" style="display:block;border-radius:5px;border:1px solid #ccc;max-width: 200px;min-width: 200px;margin-top:5px;">
             </div>
             <div class="layui-form-mid layui-word-aux"> 网站LOGO图片</div>
-        </div>
+        </div>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">手机站LOGO</label>
             <div class="layui-input-inline upload">
                 <button type="button" name="upload" class="layui-btn layui-btn-primary layui-upload"  id="upload_logo_chose_mobile_btn"">{if condition="empty($config['site_logo_mobile'])"}请上传手机站Logo{else}更改Logo{/if}</button>
@@ -46,9 +46,9 @@
                 <img src="{$config['site_logo_mobile']}" id="img_logo_mobile" onmouseover="imgTips(this,{width:400,className:'imgTips',bgColor:'#fff'})" style="display:block;border-radius:5px;border:1px solid #ccc;max-width: 200px;min-width: 200px;margin-top:5px;">
             </div>
             <div class="layui-form-mid layui-word-aux"> 推荐尺寸:210x70px(宽x高)</div>
-        </div>
+        </div>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">网站收藏图标</label>
             <div class="layui-input-inline upload">
                 <button type="button" name="upload" class="layui-btn layui-btn-primary layui-upload"  id="upload_ico_chose_btn">{if condition="empty($config['site_favicon'])"}请上传网站图标{else}更改图标{/if}</button>
@@ -56,7 +56,7 @@
                 <img id="img_ico" onmouseover="imgTips(this,{width:100,className:'imgTips'})" src="{$config['site_favicon']}" style="border-radius:5px;border:1px solid #ccc" width="36" height="36">
             </div>
             <div class="layui-form-mid layui-word-aux"> 又叫网站收藏夹图标，它显示位于浏览器的地址栏或者标题前面，<strong class="red">.ico格式</strong>，<a href="https://www.baidu.com/s?ie=UTF-8&amp;wd=favicon" target="_blank">点此了解网站图标</a></div>
-        </div>
+        </div>-->
 
         <div class="layui-form-item">
             <label class="layui-form-label">网站标题</label>
@@ -116,13 +116,13 @@
             </div>
             <div class="layui-form-mid layui-word-aux">是否允许金币提现</div>
         </div>
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">提现频率</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="withdrawals_frequency" value="{$config['withdrawals_frequency']}" autocomplete="off" placeholder="输入间隔小时">
             </div>
             <div class="layui-form-mid layui-word-aux">单位小时：提交了提现申请之后多久可以再次申请</div>
-        </div>
+        </div>-->
         <div class="layui-form-item">
             <label class="layui-form-label">提现最低限额</label>
             <div class="layui-input-inline">
@@ -132,7 +132,7 @@
         </div>
 
 
-        <fieldset class="layui-elem-field layui-field-title">
+        <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>奖励设置</legend>
         </fieldset>
         <div class="layui-form-item">
@@ -141,35 +141,35 @@
                 <input type="text" class="layui-input" name="register_reward" value="{$config['register_reward']}" autocomplete="off" placeholder="请填写奖励金币数">
             </div>
             <div class="layui-form-mid layui-word-aux">新用户注册奖励多少金币，可空</div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">登录奖励</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="login_reward" value="{$config['login_reward']}" autocomplete="off" placeholder="请填写奖励金币数">
             </div>
             <div class="layui-form-mid layui-word-aux">用户当天首次登录奖励多少金币，可空</div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">签到奖励</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="sign_reward" value="{$config['sign_reward']}" autocomplete="off" placeholder="请填写奖励金币数">
             </div>
             <div class="layui-form-mid layui-word-aux">用户签到奖励多少金币，可空</div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">宣传奖励</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="propaganda_reward" value="{$config['propaganda_reward']}" autocomplete="off" placeholder="请填写奖励金币数">
             </div>
             <div class="layui-form-mid layui-word-aux">用户宣传奖励多少金币，可空</div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">宣传次数</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="share_num" value="{$config['share_num']}" autocomplete="off" placeholder="请填写用户宣传可获取奖励金币次数">
             </div>
             <div class="layui-form-mid layui-word-aux">用户宣传可获取奖励金币次数</div>
-        </div>
+        </div>-->
         <fieldset class="layui-elem-field layui-field-title">
             <legend>评论设置</legend>
         </fieldset>
@@ -196,16 +196,16 @@
             <div class="layui-input-inline">
                 <input type="checkbox" name="resource_examine_on"   lay-skin="switch" lay-text="需要|不用"  {if condition="$config['resource_examine_on'] eq 1"}checked=""{/if}>
             </div>
-            <div class="layui-form-mid layui-word-aux">客户上传了新资源（视频、图册、资讯）是否需要审核</div>
+            <div class="layui-form-mid layui-word-aux">客户上传了新资源是否需要审核</div>
         </div>
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">视频</label>
             <div class="layui-input-inline">
                 <input type="checkbox" name="video_reexamination"   lay-skin="switch" lay-text="需要|不用"  {if condition="$config['video_reexamination'] eq 1"}checked=""{/if}>
             </div>
             <div class="layui-form-mid layui-word-aux">客户编辑视频信息后是否需要重新审核，如修改了标题，标签，视频地址等</div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">图片</label>
             <div class="layui-input-inline">
                 <input type="checkbox" name="image_reexamination"   lay-skin="switch" lay-text="需要|不用"  {if condition="$config['image_reexamination'] eq 1"}checked=""{/if}>
@@ -218,9 +218,9 @@
                 <input type="checkbox" name="novel_reexamination"   lay-skin="switch" lay-text="需要|不用"  {if condition="$config['novel_reexamination'] eq 1"}checked=""{/if}>
             </div>
             <div class="layui-form-mid layui-word-aux">客户编辑资讯信息后是否需要重新审核，如修改了标题，标签，资讯内容等</div>
-        </div>
+        </div>-->
 
-        <fieldset class="layui-elem-field layui-field-title">
+        <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>其他设置</legend>
         </fieldset>
         <div class="layui-form-item">
@@ -247,15 +247,15 @@
                 <input type="text" class="layui-input" name="reward_num" value="{$config['reward_num']}" autocomplete="off" placeholder="输入显示名次">
             </div>
             <div class="layui-form-mid layui-word-aux">首页打赏排行显示名次：例如首页排行榜显示前五名</div>
-        </div>
-
+        </div>-->
+<!--
         <div class="layui-form-item">
             <label class="layui-form-label">验证码</label>
             <div class="layui-input-inline">
                 <input type="checkbox" name="verification_code_on"   lay-skin="switch" lay-text="开启|关闭"  {if condition="$config['verification_code_on'] eq 1"}checked=""{/if}>
             </div>
             <div class="layui-form-mid layui-word-aux">是否开启验证码</div>
-        </div>
+        </div>-->
 
         <div class="layui-form-item">
             <div class="layui-input-block">

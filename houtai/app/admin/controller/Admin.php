@@ -96,7 +96,22 @@ class Admin extends Common
             $this->assign('languages', model('AdminLanguage')->lists());
         }
     }
-
+	
+	protected function getFronturl($path='', $uid=''){
+		if(!$path) return null;
+        
+        if(stripos($path,'http') > -1) return $path;
+		
+		$web_server_url=$this->myDb->name('admin_config')->where("name='web_server_url'")->find();
+        $web_server_url=$web_server_url?$web_server_url['value']:'';
+        
+        if($uid){
+            $fullPath = $web_server_url."/uploads/$uid/".str_replace('\\','/',$path);
+        }else{
+                $fullPath = $web_server_url."/uploads/".str_replace('\\','/',$path);
+        }  
+        return $fullPath;
+	}
     /**
      * 获取当前方法URL
      * @author frs whs tcl dreamer ©2016

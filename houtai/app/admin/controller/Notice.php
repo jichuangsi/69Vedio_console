@@ -19,10 +19,9 @@ class Notice extends  Admin
      * 后台公告列表获取
      */
     public function index(){
-        $list= $this->myDb->name('notice')->order('sort asc')->select();
+        $list= $this->myDb->name('notice')->order('sort desc')->select();
         $this->assign('list', $list);
       return $this->fetch();
-
 
     }
 
@@ -45,6 +44,7 @@ class Notice extends  Admin
             if($result !== true) {
                 return $this->error($result);
             }
+            $data['add_time'] = time();
             $data['out_time'] = strtotime($data['out_time']);
             //print_r($data);
             $insert=$this->myDb->name('notice')->insert($data);

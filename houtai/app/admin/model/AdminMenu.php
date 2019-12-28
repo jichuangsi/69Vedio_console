@@ -109,9 +109,9 @@ class AdminMenu extends Model
     {
         $cache_tag = md5('_admin_child_menu'.$pid.$field.$status.dblang('admin'));
         $trees = [];
-        if (config('develop.app_debug') == 0 && $level == 0) {
-            $trees = cache($cache_tag);
-        }
+//      if (config('develop.app_debug') == 0 && $level == 0) {
+//          $trees = cache($cache_tag);
+//      }
 
         if (empty($trees)) {
             if (empty($data)) {
@@ -120,6 +120,7 @@ class AdminMenu extends Model
                 if ($status == 1) {
                     $map['status'] = 1;
                 }
+                $map['isstatus'] = 1;
                 $data = self::where($map)->order('sort asc')->column($field);
                 $data = array_values($data); 
             }
@@ -172,7 +173,7 @@ class AdminMenu extends Model
                 $map['status'] = 1;
                 $map['nav'] = 1;
                 $map['uid'] = ['in', '0,'.ADMIN_ID];
-
+				$map['isstatus'] =1;
                 $data = self::where($map)->order('sort asc')->column('id,pid,module,title,url,param,target,icon');
 
                 $data = array_values($data); 

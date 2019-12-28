@@ -39,30 +39,34 @@ class System extends Admin
                 'title' => '视频设置',
                 'url' => 'admin/system/video',
             ],
-            [
-                'title' => '提成设置',
-                'url' => 'admin/system/commission',
-            ],
+//          [
+//              'title' => '提成设置',
+//              'url' => 'admin/system/commission',
+//          ],
             [
                 'title' => '附件设置',
                 'url' => 'admin/system/attachment',
             ],
             [
-                'title' => '邮件设置',
-                'url' => 'admin/system/email',
+                'title' => '工具',
+                'url' => 'admin/system/tools',
             ],
-            [
-                'title' => '短信设置',
-                'url' => 'admin/system/sms',
-            ],
-            [
-                'title' => '视频自动入库',
-                'url' => 'admin/system/syncAddVideo',
-            ],
-            [
-                'title' => '友情链接',
-                'url' => 'admin/system/friendLink',
-            ],
+//          [
+//              'title' => '邮件设置',
+//              'url' => 'admin/system/email',
+//          ],
+//          [
+//              'title' => '短信设置',
+//              'url' => 'admin/system/sms',
+//          ],
+//          [
+//              'title' => '视频自动入库',
+//              'url' => 'admin/system/syncAddVideo',
+//          ],
+//          [
+//              'title' => '友情链接',
+//              'url' => 'admin/system/friendLink',
+//          ],
         ];
         $this->assign('tab_type', 1);
         $this->tab_data = $tab_data;

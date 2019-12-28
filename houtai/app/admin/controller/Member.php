@@ -29,10 +29,10 @@ class Member extends Admin
                 'title' => '会员列表',
                 'url' => 'admin/member/index?types=member',
             ],
-            [
-                'title' => '代理商列表',
-                'url' => 'admin/member/index?types=agent',
-            ],
+//          [
+//              'title' => '代理商列表',
+//              'url' => 'admin/member/index?types=agent',
+//          ],
         ];
         $this->tab_data = $tab_data;
         $types = $this->request->param('types/s','member');

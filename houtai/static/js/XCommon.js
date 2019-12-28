@@ -14,16 +14,17 @@ function imgTips(e,param){
     var width=800;
     var className='tipsimg';
     var bgColor='#fff';
-
+//	console.log(param)
     if(param!=undefined){
         if(param.width!=undefined)  width=param.width;
         if(param.className!=undefined)  className=param.className;
         if(param.bgColor!=undefined)  bgColor=param.bgColor;
     }
 
-    var index=layer.tips("<img style='max-width:"+width+"px;' class='"+className+"' src='"+imgSrc+"'}>",e,{tips: [1, bgColor],area: [(width+30)+'px', 'auto'],});
+//  var index=layer.tips("<img id='showimg' style='max-width:"+width+"px;' class='"+className+"' src='"+imgSrc+"'}>",e,{tips: [1, bgColor],area: [(width+30)+'px', 'auto'],});
+    var index=layer.tips("<img id='showimg' style='max-height:250px;' class='"+className+"' src='"+imgSrc+"'}>",e,{tips: [1, bgColor],area: [ 'auto','280px'],});
 
-
+//	debugger;
     $(e).on('mouseout',function(){
         layer.closeAll();
     });

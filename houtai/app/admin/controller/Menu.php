@@ -31,8 +31,8 @@ class Menu extends Admin
         foreach ($menu_list as $key => $value) {
             $tab_data['menu'][$key]['title'] = $value['title'];
         }
-        $push['title'] = '模块排序';
-        array_push($tab_data['menu'], $push);
+//      $push['title'] = '模块排序';
+//      array_push($tab_data['menu'], $push);
         $this->assign('menu_list', $menu_list);
         $this->assign('tab_data', $tab_data);
         $this->assign('tab_type', 2);

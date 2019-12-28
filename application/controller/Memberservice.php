@@ -175,7 +175,7 @@ class Memberservice extends Baseservice
         }
         $uid=$request->post('uid')?$request->post('uid'):$this->member_id;
         $member=Db::name('member')->field('*')->where('id',$uid)->select();
-        $member[0]['headimgurl']?$this->getFullResourcePath($member[0]['headimgurl'], $member[0]['id']):$this->getDefaultUserAvater();
+        $member[0]['headimgurl']=$member[0]['headimgurl']?$this->getFullResourcePath($member[0]['headimgurl'], $member[0]['id']):$this->getDefaultUserAvater();
        	$member[0]['concerned']=$this->checkisfollow($this->member_id,$uid);//判断是否已经关注
        	$member[0]['year']=$this->datediffage($member[0]['birthday']);//用户岁数
        	$member[0]['fansnum']=Db::name('member_collection')->where(['cid'=>$uid])->count('id');//用户粉丝数
@@ -241,9 +241,11 @@ class Memberservice extends Baseservice
      * 编辑个人用户信息 
      */
     public function editmemberinfo(Request $request){
+    	
 //  	if (strtoupper($request->method()) == "OPTIONS") {
 //          return Response::create()->send();
 //      }
+
         $uid   =  $this->member_id;
         $uname = $request->post('username');
         $nname = $request->post('nickname');
@@ -675,7 +677,7 @@ class Memberservice extends Baseservice
         }
         
         $user = Db::name('member')->field('gid,try_and_see')->where(['id'=>$this->member_id])->find();
-        if($user['try_and_see']===0){
+        if($user['gid']===1 && $user['try_and_see']===0){
             die(json_encode(['resultCode' => 9022, 'error' => $this->err['9022']]));
         }
         
@@ -690,7 +692,7 @@ class Memberservice extends Baseservice
         
         unset($data);
         $data['video_id'] = $vid;
-        $data['user_id'] = $this->member_id;
+        $data['user_id'] =$this->member_id;
         $data['user_ip'] = $request->ip();
         $data['try_time'] = time();
         $gid = $user['gid'];
@@ -746,7 +748,7 @@ class Memberservice extends Baseservice
         
         $query = new Query();
         
-        $query->name('member_collection')->alias('c')->field('m.id,m.username,m.headimgurl');
+        $query->name('member_collection')->alias('c')->field('m.id,m.username,m.headimgurl,m.sex');
         
         if(isset($param['join'])&&!empty($param['join'])){
             $query->join($param['join']['table'],$param['join']['on'],$param['join']['type']);

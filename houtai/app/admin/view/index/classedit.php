@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label">所属菜单</label>
         <div class="layui-input-inline">
             <select name="pid" class="field-pid" type="select" lay-filter="pai">

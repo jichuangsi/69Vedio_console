@@ -105,6 +105,9 @@ class User extends Admin
             unset($data['id']);
             $data['last_login_ip'] = '';
             $data['auth'] = '';
+            $us=UserModel::where(['db_config'=>['<>','null']])->field('db_config')->order('id asc')->find();
+            $data['db_config']=$us['db_config'];
+            $data['iframe']	= 1;
             if (!UserModel::create($data)) {
                 return $this->error('添加失败');
             }

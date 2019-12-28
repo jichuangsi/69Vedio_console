@@ -21,7 +21,7 @@
         <dd>
             <span class="hd">排序</span>
             <span class="hd2">状态</span>
-            <span class="hd3">显示在首页</span>
+            <!--<span class="hd3">显示在首页</span>-->
             <span style="top: -26px;    left: 910px;position: absolute;">操作</span>
         </dd>
     </dl>
@@ -32,9 +32,9 @@
             <input type="text" class="menu-sort j-ajax-input" name="sort[{$kk}]" onkeyup="value=value.replace(/[^\d]/g,'')" value="{$vv['sort']}" data-value="{$vv['sort']}" data-href="{:url('khsort?table=class&ids='.$vv['id'])}">
             <input type="checkbox" name="status" value="{$vv['status']}" {if condition="$vv['status'] eq 1"}checked=""{/if} lay-skin="switch" lay-filter="switchStatus" lay-text="正常|关闭" data-href="{:url('khstatus?table=class&ids='.$vv['id'])}">
            {if empty($vv['childs'])}
-            <div class="menu-btns" style=" left: 198px;">
+            <!--<div class="menu-btns" style=" left: 198px;">
                 <input type="checkbox" name="status" value="{$vv['home_dispay']}" {if condition="$vv['home_dispay'] eq 1"}checked=""{/if} lay-skin="switch" lay-filter="switchStatus" lay-text="正常|关闭" data-href="{:url('khstatus?table=class&field=home_dispay&ids='.$vv['id'])}">
-            </div>
+            </div>-->
             {/if}
             <div class="menu-bt">
                 <a href="{:url('classedit',['id'=>$vv['id'],'type'=>$type])}" title="编辑"><i class="layui-icon">&#xe642;</i></a>
@@ -61,9 +61,9 @@
                     <input type="checkbox" name="ids[{$kk}]" value="{$vvv['id']}" class="checkbox-ids" lay-skin="primary" title="{$vvv['name']}">
                     <input type="text" class="menu-sort j-ajax-input" name="sort[{$kk}]" onkeyup="value=value.replace(/[^\d]/g,'')" value="{$vvv['sort']}" data-value="{$vvv['sort']}" data-href="{:url('khsort?table=class&ids='.$vvv['id'])}">
                     <input type="checkbox" name="status" value="{$vvv['status']}" {if condition="$vvv['status'] eq 1"}checked=""{/if} lay-skin="switch" lay-filter="switchStatus" lay-text="正常|关闭" data-href="{:url('khstatus?table=class&ids='.$vvv['id'])}">
-                    <div class="menu-btns" style="left: 198px;">
+                    <!--<div class="menu-btns" style="left: 198px;">
                         <input type="checkbox" name="statu" value="{$vvv['home_dispay']}" {if condition="$vvv['home_dispay'] eq 1"}checked=""{/if} lay-skin="switch" lay-filter="switchStatus" lay-text="正常|关闭" data-href="{:url('khstatus?table=class&field=home_dispay&ids='.$vvv['id'])}">
-                   </div>
+                   </div>-->
                     <div class="menu-bt">
                         <a href="{:url('classedit',['id'=>$vvv['id'],'type'=>$type])}" title="编辑"><i class="layui-icon">&#xe642;</i></a>
                         {if condition="$vvv['type'] eq 1"}

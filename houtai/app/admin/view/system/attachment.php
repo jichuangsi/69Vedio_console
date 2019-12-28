@@ -5,8 +5,8 @@
             <div class="layui-input-inline">
                 <select class="field-role_id" lay-verify="checkSaveType" name="image_save_server_type" id="image_save_server_type"  lay-skin="switch" lay-filter="image_save_server_type"  >
                     <option value="web_server" {if condition="$config['image_save_server_type'] eq 'web_server'"}selected{/if}>web服务器</option>
-                    <option value="qiniuyun" {if condition="$config['image_save_server_type'] eq 'qiniuyun'"}selected{/if}>七牛云存储</option>
-                    <option value="aliyunoss" {if condition="$config['image_save_server_type'] eq 'aliyunoss'"}selected{/if}>阿里云存储</option>
+                    <!--<option value="qiniuyun" {if condition="$config['image_save_server_type'] eq 'qiniuyun'"}selected{/if}>七牛云存储</option>
+                    <option value="aliyunoss" {if condition="$config['image_save_server_type'] eq 'aliyunoss'"}selected{/if}>阿里云存储</option>-->
                 </select>
             </div>
         </div>
@@ -15,10 +15,10 @@
             <label class="layui-form-label">视频存储方式</label>
             <div class="layui-input-inline">
                 <select class="field-role_id" lay-verify="checkSaveType" name="video_save_server_type" id="video_save_server_type"  lay-skin="switch" lay-filter="video_save_server_type"  >
-                    <option value="yunzhuanma" {if condition="$config['video_save_server_type'] eq 'yunzhuanma'"}selected{/if}>云转码</option>
+                    <!--<option value="yunzhuanma" {if condition="$config['video_save_server_type'] eq 'yunzhuanma'"}selected{/if}>云转码</option>-->
                     <option value="web_server" {if condition="$config['video_save_server_type'] eq 'web_server'"}selected{/if}>web服务器</option>
-                    <option value="qiniuyun" {if condition="$config['video_save_server_type'] eq 'qiniuyun'"}selected{/if}>七牛云存储</option>
-                    <option value="aliyunoss" {if condition="$config['video_save_server_type'] eq 'aliyunoss'"}selected{/if}>阿里云存储</option>
+                    <!--<option value="qiniuyun" {if condition="$config['video_save_server_type'] eq 'qiniuyun'"}selected{/if}>七牛云存储</option>
+                    <option value="aliyunoss" {if condition="$config['video_save_server_type'] eq 'aliyunoss'"}selected{/if}>阿里云存储</option>-->
                 </select>
             </div>
         </div>
@@ -31,10 +31,10 @@
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="web_server_url" id="web_server_url" value="{$config['web_server_url']}" autocomplete="off" placeholder="请填写Web服务器URL">
             </div>
-            <div class="layui-form-mid layui-word-aux">直接填写Web服务器(您的前端网站)的「url」即可</div>
+            <div class="layui-form-mid layui-word-aux">直接填写Web服务器的「url」即可</div>
         </div>
 
-        <fieldset class="layui-elem-field layui-field-title">
+        <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>云转码设置</legend>
         </fieldset>
         <div class="layui-form-item">
@@ -43,20 +43,20 @@
                 <input type="text" class="layui-input" name="yzm_upload_url" id="yzm_upload_url" value="{$config['yzm_upload_url']}" autocomplete="off" placeholder="请填写云转码地址">
             </div>
             <div class="layui-form-mid layui-word-aux">直接填写云转码服务器的「url」或「ip」即可</div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">云转码播放密钥</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="yzm_play_secretkey" id="yzm_play_secretkey" value="{$config['yzm_play_secretkey']}" autocomplete="off" placeholder="请填写云转码播放密钥">
             </div>
             <div class="layui-form-mid layui-word-aux">请与云转码后台设置保持一致</div>
-        </div>
+        </div>-->
 
-        <fieldset class="layui-elem-field layui-field-title">
+        <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>七牛云存储设置</legend>
-        </fieldset>
+        </fieldset>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">存储区域</label>
             <div class="layui-input-inline">
                 <select  name="qiniu_upload_server" id="qiniu_upload_server" lay-skin="switch" lay-filter="qiniu_upload_server"  >
@@ -66,17 +66,17 @@
                     <option value="北美" {if condition="$config['qiniu_upload_server'] eq '北美'"}selected{/if} >北美(na0)</option>
                 </select>
             </div>
-        </div>
+        </div>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">外链默认域名</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="qiniu_resource_default_domain" id="qiniu_resource_default_domain" value="{$config['qiniu_resource_default_domain']|default=''}" autocomplete="off" placeholder="请填写七牛外链默认域名">
             </div>
             <div class="layui-form-mid layui-word-aux">七牛官网申请，<a target="_blank" href="https://www.qiniu.com">点击申请</a></div>
-        </div>
+        </div>-->
 
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">AccessKey</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="qiniu_accesskey" id="qiniu_accesskey" value="{$config['qiniu_accesskey']}" autocomplete="off" placeholder="请填写七牛AccessKey">
@@ -96,10 +96,10 @@
                 <input type="text" class="layui-input" name="qiniu_bucket" id="qiniu_bucket" value="{$config['qiniu_bucket']}" autocomplete="off" placeholder="请填写七牛AccessKey">
             </div>
             <div class="layui-form-mid layui-word-aux">你的七牛云存储仓库名称</div>
-        </div>
+        </div>-->
 
         <!--杭州、上海、青岛、北京、张家口、深圳、香港、硅谷、弗吉尼亚、新加坡、悉尼、日本、法兰克福、迪拜-->
-        <fieldset class="layui-elem-field layui-field-title">
+        <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>阿里云存储(OSS)设置</legend>
         </fieldset>
         <div class="layui-form-item">
@@ -122,8 +122,8 @@
                     <option value="迪拜" {if condition="$config['aliyun_oss_city'] eq '迪拜'"}selected{/if}>迪拜</option>
                 </select>
             </div>
-        </div>
-        <div class="layui-form-item">
+        </div>-->
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">AccessKeyId</label>
             <div class="layui-input-inline">
                 <input type="text" class="layui-input" name="aliyun_accesskey" id="aliyun_accesskey" value="{$config['aliyun_accesskey']}" autocomplete="off" placeholder="请填写AccessKeyId">
@@ -143,7 +143,7 @@
                 <input type="text" class="layui-input" name="aliyun_bucket"  id="aliyun_bucket" value="{$config['aliyun_bucket']}" autocomplete="off" placeholder="请填写Bucket">
             </div>
             <div class="layui-form-mid layui-word-aux">你的阿里云存储仓库名称</div>
-        </div>
+        </div>-->
 
         <div class="layui-form-item">
             <div class="layui-input-block">

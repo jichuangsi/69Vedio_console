@@ -38,7 +38,7 @@
             <div class="layui-input-inline">
                 <input type="number"  class="layui-input" name="look_at_num_mobile" value="{$config['look_at_num_mobile']}" autocomplete="off" placeholder="请填写可试看数量">
             </div>
-            <!-- <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >防止UC手机端非法浏览VIP资源，故手机端单独设置</div> -->
+             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数</div> 
         </div>
 
         <div class="layui-form-item">
@@ -50,7 +50,7 @@
     </form>
 </div>
 <style type="text/css">
-    .layui-form-item .layui-form-label{width:150px;}
+    .layui-form-item .layui-form-label{width:180px;}
     .layui-form-item .layui-input-inline{max-width:80%;width:auto;min-width:320px;}
     .layui-field-title:not(:first-child){margin: 30px 0}
 </style>

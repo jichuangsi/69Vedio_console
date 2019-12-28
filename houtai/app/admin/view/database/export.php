@@ -17,7 +17,7 @@
                 <th>数据量</th>
                 <th>大小</th>
                 <th>冗余</th>
-                <th>备注</th>
+                <!--<th>备注</th>-->
                 <th>操作</th>
             </tr> 
         </thead>
@@ -29,7 +29,7 @@
                 <td>{$vo['Rows']}</td>
                 <td>{$vo['Data_length']/1024} kb</td>
                 <td>{$vo['Data_free']/1024} kb</td>
-                <td>{$vo['Comment']}</td>
+                <!--<td>{$vo['Comment']}</td>-->
                 <td> 
                     <div class="layui-btn-group">
                         <a data-href="{:url('optimize?ids='.$vo['Name'])}" class="layui-btn layui-btn-primary layui-btn-small j-ajax">优化</a>

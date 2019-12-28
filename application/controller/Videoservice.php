@@ -391,6 +391,9 @@ class Videoservice extends Baseservice
         $param['where'] = ['user_id'=>$uid];
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
         $param['order'] = 'add_time desc';
+        if($uid==$this->member_id){
+        	$param['ismy']=1;
+        }
         $videos=$this->fetchVideos($param);
         if(!empty($videos['videos'])){
         	foreach($videos['videos'] as $k=>$val){
@@ -623,7 +626,9 @@ class Videoservice extends Baseservice
         }
         
         if(get_config('resource_examine_on')){
-            $query->where(['is_check'=>1]);
+        	if(!isset($param['ismy'])&&empty($param['ismy'])){
+        		 $query->where(['is_check'=>1]);
+        	}
         }
                 
         if(isset($param['where'])&&!empty($param['where'])){

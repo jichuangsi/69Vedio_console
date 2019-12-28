@@ -60,9 +60,6 @@
 
 <div class="layui-row layui-col-space10">
      <div class="version">
-        您当前的系统版本为：<span id="versionSpan">1.13.35</span>
-                    ，当前为最新版本。
-            </div> 
   
     <div class="layui-col-md3 panel">
         <div class="panel_icon" style="background-color:#FF5722">
@@ -73,7 +70,7 @@
             <p><a title="去审核" href="/admin.php/admin/video/videocheck.html">{$data['videoshenhe']}/待审</a></p>
         </div>
     </div>
-    <div class="layui-col-md3 panel">
+    <!--<div class="layui-col-md3 panel">
         <div class="panel_icon" style="background-color: #54ade8;">
             <p><i class="fa fa-file-image-o" style="font-size:30px;"></i></p><p>图册</p>
         </div>
@@ -81,8 +78,8 @@
             <h3><a title="管理" href="{:url('admin/image/lists')}">{$data['atlascount']}</a></h3>/个
             <p><a title="去审核" href="/admin.php/admin/image/imgcheck.html">{$data['atlasshenhe']}/待审</a></p>
         </div>
-    </div>
-    <div class="layui-col-md3 panel">
+    </div>-->
+    <!--<div class="layui-col-md3 panel">
         <div class="panel_icon" style="background-color:#FFB800">
             <p><i class="fa fa-file-text" style="font-size:30px;"></i><br/></p><p>资讯</p>
         </div>
@@ -90,7 +87,7 @@
             <h3><a title="管理" href="{:url('admin/novel/lists')}">{$data['novelcount']}</a></h3>/条
             <p><a title="去审核" href="/admin.php/admin/novel/novelcheck.html">{$data['novelshenhe']}/待审</a></p>
         </div>
-    </div>
+    </div>-->
     <div class="layui-col-md3 panel">
         <div class="panel_icon" style="background-color: #5FB878;">
             <p><i class="fa fa-users" style="font-size:30px;"></i></p><p>会员</p>
@@ -102,18 +99,18 @@
 </div>
 
 <!-- 新增会员走势 start -->
-<div id="container" class="col-md6"></div>
+<!--<div id="container" class="col-md6"></div>
 <div id="viewVideoMonthCharts" class="col-md6"></div>
 <div id="viewAtlasMonthCharts" class="col-md6"></div>
-<div id="viewNovelMonthCharts" class="col-md6"></div>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<div id="viewNovelMonthCharts" class="col-md6"></div>-->
+<!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>-->
 
 {if isset($data['memberMonthList'])}
 <script type="text/javascript">
@@ -271,10 +268,8 @@
 </script>
 {/if}
 
-<!-- MsvodX系统信息 start -->
-<!--<a href="/1.xls">test Download</a>-->
 
-<div class="fr" style="width:49%;margin-top:50px;">
+<div class="fr" style="width:49%;margin-top:150px;">
     <table class="layui-table" lay-skin="line">
         <colgroup>
             <col width="160">
@@ -288,25 +283,25 @@
         <tbody>
         <tr>
             <td>产品名称</td>
-            <td>MsvodX</td>
+            <td>69视频</td>
         </tr>
         <tr>
             <td>官方网站</td>
-            <td><a href="http://www.msvod.cc" target="_blank" rel="noreferrer">MSVOD魅思CMS</a></td>
+            <td><!--<a href="javascript:void(0)" target="_blank" rel="noreferrer"></a>--></td>
         </tr>
         <tr>
             <td>联系QQ</td>
-            <td><a href="http://wpa.qq.com/msgrd?v=3&uin=1239665669&site=qq&menu=yes" target="_blank" rel="noreferrer">1239665669</a></td>
+            <td><a href="http://wpa.qq.com/msgrd?v=3&uin=123456789&site=qq&menu=yes" target="_blank" rel="noreferrer">123456789</a></td>
         </tr>
         <tr>
             <td>官网</td>
-            <td><a href="http://www.msvodx.com/" target="_blank">www.msvodx.com</a></td>
+            <td><!--<a href="javascript:void(0)" target="_blank"></a>--></td>
         </tr>
         </tbody>
     </table>
 </div>
 
-<div class="fl" style="width:49%;margin-top:50px;">
+<div style="width:49%;margin-top:150px;">
     <table class="layui-table" lay-skin="line">
         <colgroup>
             <col width="160">

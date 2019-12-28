@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>管理控制台 -  Powered by Msvodx版</title>
+    <title>管理控制台 -  69视频</title>
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <link rel="stylesheet" href="__ADMIN_JS__/layui/css/layui.css">
     <link rel="stylesheet" href="__ADMIN_CSS__/style.css">
@@ -44,7 +44,7 @@ $ca = strtolower(request()->controller().'/'.request()->action());
         </ul>
         <ul class="layui-nav fr nobg head-info" lay-filter="">
             <li class="layui-nav-item">
-                <a href="javascript:void(0);">{$admin_user['nick']} <span style="color:yellow">&nbsp; ({$admin_user['version']})</span>&nbsp;&nbsp;</a>
+                <a href="javascript:void(0);">{$admin_user['nick']} &nbsp;&nbsp;</a>
                 <dl class="layui-nav-child">
                     <dd><a data-id="00" href="{:url('admin/user/info')}" class="admin-nav-item"><span style="color:#333">个人设置</span></a></dd>
                     <dd><a href="{:url('admin/user/iframe?val=0')}" class="j-ajax" refresh="yes">默认布局</a></dd>

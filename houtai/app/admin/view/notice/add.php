@@ -1,11 +1,11 @@
 ﻿<form class="layui-form layui-form-pane" action="{:url()}" method="post" id="editForm">
     <div class="layui-form-item">
-        <label class="layui-form-label">公告标题</label>
+        <label class="layui-form-label">消息标题</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input field-username" name="title"  autocomplete="off" placeholder="请输入公告标题" style="width: 650px;padding-right:10px; ">
         </div>
     </div>
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label">展示方式</label>
         <div class="layui-input-inline">
             <select name="type" class="field-role_id" type="select"   lay-skin="switch" lay-filter="type"  >
@@ -19,9 +19,7 @@
     <div class="layui-form-item" id='content'>
         <label class="layui-form-label">展示内容</label>
         <div class="layui-input-inline">
-            <textarea rows="6" class="layui-textarea" name="content" autocomplete="off" placeholder="请填写弹出层展示的内容"  style="width: 650px;padding-right:10px; ">
-
-            </textarea>
+            <textarea rows="6" class="layui-textarea" name="content" autocomplete="off" placeholder="请填写展示的内容"  style="width: 650px;padding-right:10px; "></textarea>
         </div>
     </div>
     <div class="layui-form-item" id='url' style="display: none">
@@ -50,9 +48,9 @@
         <div class="layui-input-inline">
             <input type="text" class="layui-input field-username" name="sort"  autocomplete="off" placeholder="请输入排序编号">
         </div>
-        <div class="layui-form-mid layui-word-aux">数值越小越靠前</div>
+        <div class="layui-form-mid layui-word-aux">数值越大越靠前</div>
     </div>
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label">公告有效期</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input field-expire_time" name="out_time" autocomplete="off" placeholder="请设置公告有效期" onclick="layui.laydate({elem: this,format:'YYYY-MM-DD'})" readonly>

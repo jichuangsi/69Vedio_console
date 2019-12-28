@@ -3,7 +3,8 @@
     <div class="layui-form-item">
         <label class="layui-form-label">用户名</label>
         <div class="layui-input-inline">
-            <input type="text" class="layui-input field-username" name="username"  autocomplete="off" placeholder="请输入用户名" value="{$info['username']}" readonly>
+            <!--<input type="text" class="layui-input field-username" name="username"  autocomplete="off" placeholder="请输入用户名" value="{$info['username']}" readonly>-->
+            	<input type="text" class="layui-input field-username" name="username"  autocomplete="off" placeholder="请输入用户名" value="{$info['username']}" >
         </div>
     </div>
     <div class="layui-form-item">
@@ -12,26 +13,26 @@
             <input type="text" data-disabled class="layui-input field-nick" name="nickname" autocomplete="off" placeholder="请输入昵称" value="{$info['nickname']}">
         </div>
     </div>
-    <div class="layui-form-item">
+    <!--<div class="layui-form-item">
         <label class="layui-form-label">联系邮箱</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input field-email" name="email" autocomplete="off" placeholder="请输入邮箱地址" value="{$info['email']}">
         </div>
-    </div>
-    <div class="layui-form-item">
+    </div>-->
+    <!--<div class="layui-form-item">
         <label class="layui-form-label">联系手机</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input field-mobile" name="tel" autocomplete="off" placeholder="请输入手机号码" value="{$info['tel']}">
         </div>
-    </div>
-    <div class="layui-form-item">
+    </div>-->
+    <!--<div class="layui-form-item">
         <label class="layui-form-label">登录密码</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input field-mobile" id="password" name="password" autocomplete="off" placeholder="如不需要修改则留空" value="">
         </div>
         <a class="layui-btn layui-btn-primary ml10" onclick="$('#password').val('123456')">设为默认密码</a>
        （PS :  默认密码为123456）
-    </div>
+    </div>-->
     <div class="layui-form-item">
         <label class="layui-form-label">会员有效期</label>
         <div class="layui-input-inline">
@@ -58,7 +59,7 @@
             <input type="radio" class="field-status" name="status" value="0" title="禁用"  {if condition="$info['status'] neq 1"}checked=""{/if} >
         </div>
     </div>
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label">是否是代理</label>
         <div class="layui-input-inline">
             <input type="radio" class="field-status" name="is_agent" value="1" title="是"  {if condition="$info['is_agent'] eq 1"}checked=""{/if} >

@@ -30,7 +30,7 @@
             <input type="text" id="title" class="layui-input" name="video[title]" value="{$videoinfo['title']}" autocomplete="off" placeholder="请填写">
         </div>
     </div>
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label layui-bg-gray">视频推荐：</label>
         <div class="layui-input-inline">
             <select name="video[reco]" class="field-pid" type="select" lay-filter="pai">
@@ -48,7 +48,7 @@
         <div class="layui-input-inline">
             <input type="text" class="layui-input" name="video[gold]" value="{$videoinfo['gold']}" autocomplete="off" >
         </div>
-        <div class="layui-form-mid layui-word-aux"> *非会员观看需要支付金币</div>
+        <div class="layui-form-mid layui-word-aux"> *观看需要支付金币</div>
     </div>
 <!--    <div class="layui-form-item">
         <label class="layui-form-label layui-bg-gray">关键字：</label>
@@ -92,7 +92,7 @@
     </div>
 
     <div class="layui-form-item" id="yzm_file_list" style="width: 450px;font-size:12px!important;color:grey"></div>
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label layui-bg-gray">下载链接：</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input" name="video[download_url]" id="downpath1" value="{$videoinfo['download_url']}" autocomplete="off" >
@@ -105,11 +105,11 @@
         </div>
         <div class="layui-input-inline">
             <a id="video_thumb_up_btn" href="javascript:" class="layui-btn layui-btn-primary" style="background-color: #fff;">更换</a>
-            &nbsp;&nbsp; <img onmouseout="layer.closeAll();"  onmouseover="imgTips(this,{width:320})" style="border-radius:5px;border:1px solid #ccc;"  height="36" id="img_video_thumb" src="{$videoinfo['thumbnail']}">
+            &nbsp;&nbsp; <img onmouseout="layer.closeAll();"  onmouseover="imgTips(this,{width:320})" style="border-radius:5px;border:1px solid #ccc;"  height="36" id="img_video_thumb" src="{$videoinfo['imgview']}">
         </div>
     </div>
 
-    <div class="layui-form-item">
+    <div class="layui-form-item" style="display: none;">
         <label class="layui-form-label layui-bg-gray">视频时长：</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input" name="video[play_time]" id="playtime" id="playtime" value="{$videoinfo['play_time']}" autocomplete="off" >
@@ -124,7 +124,8 @@
     <div class="layui-form-item">
         <label class="layui-form-label  layui-bg-gray">视频简介:</label>
         <div class="layui-input-block">
-            <textarea id="UEditor1" name="video[info]" style="width: 60%;">{$videoinfo['info']}</textarea>
+            <!--<textarea id="UEditor1" name="video[info]" style="width: 60%;">{$videoinfo['info']}</textarea>-->
+            <textarea name="video[info]" style="width: 60%;" rows="7">{$videoinfo['info']}</textarea>
         </div>
     </div>
     <div class="layui-form-item">
@@ -144,6 +145,8 @@
 
 <script>
     function afterUpThumb(resp){
+    	var path=resp.filePath;
+    	console.log(path.slice(path.indexOf("uploads/")+8));
         $('#img_video_thumb').attr('src',resp.filePath);
         $('#titlepic').val(resp.filePath);
         layer.msg('上传缩略图完成',{time:500});
@@ -151,6 +154,7 @@
 
     function afterUpVideo(resp){
         console.log(resp);
+        var path=resp.filePath;
         $('#odownpath1').val(resp.filePath);
         layer.msg('上传视频完成',{time:500});
     }
