@@ -85,7 +85,18 @@
     });
     
     function getApp(){
-    	window.location.href = '/app/getApp/d/'+did;
+    	var u = navigator.userAgent;
+
+		var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+		
+		var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+    	if (isAndroid == true) {
+			window.location.href = '/app/getApp/d/'+did+'/i/android';
+//			alert("安卓手机");
+		} else {
+			window.location.href = '/app/getApp/d/'+did+'/i/ios';
+//			alert("苹果手机");
+		}
     }
     
     </script>

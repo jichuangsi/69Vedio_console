@@ -26,6 +26,7 @@ class App extends Controller{
     
     public function getApp(Request $request){
         $did = $request->param('d');
+        $isios = $request->param('i');
         
         $isExist = Db::name('devices')->where(['id'=>$did])->count();
         $ret = '';
@@ -37,7 +38,9 @@ class App extends Controller{
             $path = ROOT_PATH.'apk/';
             //$file_name = request()->param("filename");
             $file_name = "69Video.apk";     //下载文件名
-            
+            if($isios=="ios"){
+            	$file_name = "69VideoIOS.ipa";
+            }
             //中文需要转码
             $fileAdd = iconv('UTF-8', 'GB2312', $path . $file_name);
             //检查文件是否存在
