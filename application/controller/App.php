@@ -44,7 +44,7 @@ class App extends Controller{
             //中文需要转码
             $fileAdd = iconv('UTF-8', 'GB2312', $path . $file_name);
             //检查文件是否存在
-            if (!file_exists($fileAdd) || !explode(".apks", $fileAdd) || !is_file($fileAdd)) {
+            if (!file_exists($fileAdd) || !explode(".apk", $fileAdd) || !is_file($fileAdd)  || !explode(".ipa", $fileAdd)) {
                 return $this->error('应用下载异常！');
             } else {
                 //告诉浏览器这是一个文件流格式的文件(app)
