@@ -268,7 +268,7 @@ class Memberservice extends Baseservice
         }
         if($img){
             unset($info);
-            $info = $img->validate(['size'=>1048576,'ext'=>'jpg,png,gif'])->move($movePath);
+            $info = $img->validate(['size'=>1048576*5,'ext'=>'jpg,png,gif,jpeg'])->move($movePath);
             if($info){
                 $imgInfo['ext'] = $info->getExtension();
                 $imgInfo['saveName'] = $info->getSaveName();
@@ -288,7 +288,7 @@ class Memberservice extends Baseservice
        	if($img){
        		$update['headimgurl']=$imgInfo['saveName'];
        	}
-       	if($imgInfo) $update['headimgurl'];
+       	if($imgInfo) $update['headimgurl']=$imgInfo['saveName'];
 		 $mresult=Db::name('member')->where('id',$uid)->update($update);
 		 if($mresult>0){
 		 	die(json_encode(['resultCode' => 0,'message' => '个人信息修改成功','data' => $mresult]));

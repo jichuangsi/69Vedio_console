@@ -36,7 +36,7 @@ class Videoservice extends Baseservice
     
     private $video_cover_size = 1048576*5;
     
-    private $video_cover_ext = 'jpg,png,gif';
+    private $video_cover_ext = 'jpg,png,gif,jpeg';
     
     private $video_default_size = 1048576*30;
     
