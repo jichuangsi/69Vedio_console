@@ -40,7 +40,7 @@ class Videoservice extends Baseservice
     
     private $video_default_size = 1048576*30;
     
-    private $video_default_ext = 'mp4';
+    private $video_default_ext = 'mp4,mov';
     
     /* private $member_id;
     
