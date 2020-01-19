@@ -24,8 +24,14 @@ class Drawmoney extends Admin
                  $itme['info']=json_decode($itme['info'],true);
                  return $itme;
              });
+         $list=$data_list->toArray();
+         foreach($list['data'] as $k=>$v){
+         	if($list['data'][$k]['user_id']>0){
+         		$list['data'][$k]['headimgurl'] = $this->getFronturl($list['data'][$k]['headimgurl'],$list['data'][$k]['user_id']);
+         	}
+         }
          $pages=$data_list->render();
-         $this->assign('data_list',$data_list);
+         $this->assign('data_list',$list['data']);
          $this->assign('pages',$pages);
          return $this->fetch();
     }

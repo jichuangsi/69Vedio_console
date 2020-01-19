@@ -27,20 +27,21 @@
                   {$vo['id']}
                 </td>
                 <td class="font12">
-                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl">
+                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl" onerror="onerror=null;src='__ADMIN_IMG__/avatar.png'">
                     <p class="ml10 fl"><strong class="mcolor">{$vo['nickname']} </strong><br>{$vo['tel']}<br>{$vo['email']}</p>
                 </td>
                 <td class="font12">
                     <strong>收款方式：</strong> {if condition="$vo['info']['type'] eq 1"}
                     支付宝  <br>
                     <!--<strong> 标题：</strong>{$vo['info']['title']} <br>-->
+                    <strong>收款姓名：</strong>{$vo['info']['account_name']}<br/>	
                     <strong>收款账号：</strong>{$vo['info']['account']}
                     {elseif condition="$vo['info']['type'] eq 2"}
                        银行卡<br>
                     <!--<strong>标题：</strong>{$vo['info']['title']} <br>-->
-                    <strong>账号：</strong>{$vo['info']['account']}<br>
-                    <strong>姓名:</strong>{$vo['info']['account_name']}<br>
-                    <strong>银行:</strong>{$vo['info']['bank']}
+                    <strong>收款姓名:</strong>{$vo['info']['account_name']}<br>
+                    <strong>收款账号：</strong>{$vo['info']['account']}<br>
+                    <!--<strong>银行:</strong>{$vo['info']['bank']}-->
                     {/if}
 
                 </td>

@@ -68,13 +68,22 @@ class Member extends Admin
         if(!empty($keyword)){
             $where .= " and $key like '%{$keyword}%' ";
         }
+        
         $data_list =  $this->myDb->name('member')->where($where)->order('id desc')->field('id,gid,nickname,status,headimgurl,tel,email,money,add_time,last_time,is_agent,is_permanent,out_time,username')->paginate(20,false,['query'=>$this->request->get()]);
+       	$list=$data_list->toArray();
+       	foreach ($list['data'] as $k=>$v){
+            if($list['data'][$k]['id']==0){
+                $list['data'][$k]['headimgurl'] = $this->getFronturl($list['data'][$k]['headimgurl']);
+            }else{
+            	$list['data'][$k]['headimgurl'] = $this->getFronturl($list['data'][$k]['headimgurl'],$list['data'][$k]['id']);
+            }
+        }
         // 分页
         $pages = $data_list->render();
         $this->assign('keys', $key);
         $this->assign('keyword', $keyword);
         $this->assign('member_type', $member_type);
-        $this->assign('data_list', $data_list);
+        $this->assign('data_list', $list['data']);
         $this->assign('pages', $pages);
         return $this->fetch();
 

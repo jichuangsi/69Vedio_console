@@ -5,8 +5,17 @@
 </style>
 <div class="page-toolbar" >
     <div class="layui-btn-group fl">
-
     </div>
+</div>
+<div style="width: 96%;height: 30px;display:flex;margin: auto;">
+		<div style="width: 33%;">金币总充值金额:{$price['ptotal']}元</div>
+		<div style="width: 33%;">近7日金币充值金额:{$price['pmonth']}元</div>
+		<div style="width: 33%;">今日金币充值金额:{$price['pday']}元</div>
+</div>
+<div style="width: 96%;height: 30px;display:flex;margin: auto;">
+		<div style="width: 33%;">vip总充值金额:{$vip['ptotal']}金币</div>
+		<div style="width: 33%;">近7日vip充值金额:{$vip['pmonth']}金币</div>
+		<div style="width: 33%;">今日vip充值金额:{$vip['pday']}金币</div>
 </div>
 <form id="pageListForm">
     <div class="layui-form">
@@ -31,8 +40,8 @@
             <tr>
                 <td><input type="checkbox" name="ids[]" class="layui-checkbox checkbox-ids" value="{$vo['order_sn']}" lay-skin="primary"></td>
                 <td class="font12">
-                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl">
-                    <p class="ml10 fl"><strong class="mcolor">昵称：{$vo['nickname']} </strong><br>手机：{$vo['tel']}<br>邮箱：{$vo['email']}</p>
+                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl" onerror="onerror=null;src='__ADMIN_IMG__/avatar.png'">
+                    <p class="ml10 fl"><strong class="mcolor">昵称：{$vo['nickname']}</strong> <br>手机：{$vo['tel']|default="-"}</p>
                 </td>
                 <td class="font12">{$vo['order_sn']}</td>
                 <td class="font12">{if $vo['buy_type']==2}购买VIP{elseif $vo['buy_type']===1}充值金币{/if}</td>
@@ -49,7 +58,7 @@
                     {/if}
                     <!--充值描述 end-->
                 </td>
-                <td class="font12">{$vo['price']}元</td>
+                <td class="font12">{$vo['price']}{if $vo['buy_type']==2}金币{elseif $vo['buy_type']===1}元{/if}</td>
                 <td class="font12">下单时间：{:date('Y-m-d H:i:s', $vo['add_time'])}{notempty name="$vo['pay_time']"}<br>支付时间：{:date('Y-m-d H:i:s', $vo['pay_time'])}{/notempty}</td>
                 <td class="font12">
                     {if condition="$vo['status'] eq 1"}

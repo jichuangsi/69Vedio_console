@@ -8,6 +8,11 @@
 
     </div>
 </div>
+<div style="width: 96%;height: 30px;display:flex;margin: auto;">
+		<div style="width: 33%;">总消费金额:{$price['ptotal']}</div>
+		<div style="width: 33%;">近7日消费金额:{$price['pmonth']}</div>
+		<div style="width: 33%;">今日消费金额:{$price['pday']}</div>
+</div>
 <form id="pageListForm">
     <div class="layui-form">
         <table class="layui-table mt10" lay-even="" lay-skin="row">

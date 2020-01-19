@@ -249,7 +249,12 @@ class Index extends Admin
         $memberMonthListMonth = array();
         $memberMonthListCount = array();
 
-        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m') months,COUNT(1) count FROM `ms_member` GROUP BY months");
+//      $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m') months,COUNT(1) count FROM `ms_member` GROUP BY months");
+		//本月数据
+//		$userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%d') months,COUNT(1) count FROM `ms_member` where id in (select id from ms_member where FROM_UNIXTIME(add_time, '%Y-%m') = DATE_FORMAT(now(), '%Y-%m')) GROUP BY months");
+        //近30天数据
+        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m%d') months,COUNT(1) count FROM `ms_member` where DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(FROM_UNIXTIME(add_time, '%Y-%m-%d')) GROUP BY months order by date(FROM_UNIXTIME(add_time, '%Y-%m-%d'))");
+//      dump($userarr);exit;
         foreach ($userarr as $row) {
             //$row = array_map('addslashes', $row);			
             //implode("', '", $row)
@@ -258,14 +263,32 @@ class Index extends Admin
         }
         $data['memberMonthList']['month'] =implode(",", $memberMonthListMonth);
         $data['memberMonthList']['count'] =implode(",", $memberMonthListCount);
-		
+//		dump($data);exit;
             //print_r($data['memberMonthList']['count']);
+        
+        //视频新增数量
+        $videoNewMonth = array();
+        $videoNewCount = array();
+        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m%d') months,COUNT(1) count FROM ms_video where DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(FROM_UNIXTIME(add_time, '%Y-%m-%d')) GROUP BY months order by date(FROM_UNIXTIME(add_time, '%Y-%m-%d'))");
+        foreach ($userarr as $row) {
+            //$row = array_map('addslashes', $row);			
+            //implode("', '", $row)
+            array_push($videoNewMonth,$row['months']);
+            array_push($videoNewCount,$row['count']); 
+        }
+        $data['videoNewMonthList']['month'] =implode(",", $videoNewMonth);
+        $data['videoNewCountList']['count'] =implode(",", $videoNewCount);
         
          //2视频消费增长
         $viewVideoMonthListMonth = array();
         $viewVideoMonthListCount = array();
 
-        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m') months,sum(gold) count FROM `ms_video` GROUP BY months");
+//      $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(add_time,'%Y%m') months,sum(gold) count FROM `ms_video` GROUP BY months");
+		//本月数据
+//		$userarr = $this->myDb->query("SELECT FROM_UNIXTIME(view_time,'%d') months,sum(gold) count FROM `ms_video_watch_log` where id in (select id from ms_video_watch_log where FROM_UNIXTIME(view_time, '%Y-%m') = DATE_FORMAT(now(), '%Y-%m') ) GROUP BY months");
+        //近30天数据
+        $userarr = $this->myDb->query("SELECT FROM_UNIXTIME(view_time,'%Y%m%d') months,sum(gold) count FROM ms_video_watch_log where DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(FROM_UNIXTIME(view_time, '%Y-%m-%d')) GROUP BY months order by date(FROM_UNIXTIME(view_time, '%Y-%m-%d'))");
+
         foreach ($userarr as $row) {
             //$row = array_map('addslashes', $row);			
             //implode("', '", $row)
@@ -306,7 +329,6 @@ class Index extends Admin
         ///////
 		
         $this->assign('data',$data);
-
         return $this->fetch('index');
     }
 

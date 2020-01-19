@@ -3,6 +3,8 @@
 
     </div>
 </div>
+<script src="/static/js/jquery.2.1.4.min.js"></script>
+<script src="/static/js/XCommon.js"></script>
 <form id="pageListForm">
     <div class="layui-form">
         <div class="layui-btn-group">
@@ -30,7 +32,7 @@
                   {$vo['id']}
                 </td>
                 <td class="font12">
-                    <img src="{if condition="$vo['content']"}{$vo['content']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl">
+                    <img src="{if condition="$vo['content']"}{$vo['content']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl" onmouseover="imgTips(this,{width:300})">
                     <p class="ml10 fl"><strong class="mcolor">广告位标题：{$vo['titles']} </strong><br>类型：{if condition="$vo['type'] eq 2 "}用户自定义{/if}{if condition="$vo['type'] eq 1 "}广告代码{/if}<br>说明：{$vo['info']}</p>
                 </td>
                 <td class="font12">{$vo['title']}</td>

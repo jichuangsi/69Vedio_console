@@ -41,6 +41,8 @@ class Memberservice extends Baseservice
         '9022' => '试看次数已用完',
         '9023' => '会员观看视频失败',
         '9024' => '该视频不为免费',
+        '9025' => '缺少参数',
+        '9026' => '修改卡包信息失败',
     ];
     
     /* private $member_id;
@@ -89,7 +91,7 @@ class Memberservice extends Baseservice
         
         $this->share_link_pattern = $this->httpType.$_SERVER['HTTP_HOST']."/share/";
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo','tryandsee'];
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo','tryandsee','getcard','editcard'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -107,6 +109,58 @@ class Memberservice extends Baseservice
         die(json_encode($returnData));
     } 
     
+    /*
+     * 获取卡包信息(支付宝、银行卡)
+     */
+    public function getcard(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid=$this->member_id;
+        $zinfo=Db::name('draw_money_account')->field('*')->where(['user_id'=>$uid,'type'=>1])->find();//支付宝信息
+        $cinfo=Db::name('draw_money_account')->field('*')->where(['user_id'=>$uid,'type'=>2])->find();//银行卡信息
+        unset($data);
+        $data['zhifubao'] = $zinfo;
+        $data['card'] = $cinfo;
+        die(json_encode(['resultCode'=>0,'message' => '获取卡包信息成功' ,'data' => $data]));
+    }
+    
+    /*
+     * 修改卡包信息
+     */
+    public function editcard(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $account=$request->post('account');
+        $account_name=$request->post('aname');
+        $bank=$request->post('bank');
+        $type=$request->post('type');
+        if(empty($account) || empty($account_name) || empty($type)){
+        	die(json_encode(['resultCode'=>9025,'error' => $this->err['9025']]));
+        }
+        $title;
+        switch($type){
+        	case 1:
+        		$title='支付宝'.$account;
+        		break;
+        	case 2:
+        		$title='银行卡'.$account;
+        		break;
+        }
+        unset($data);
+        $data['account']=$account;
+        $data['account_name']=$account_name;
+        $data['bank']=$bank;
+        $data['type']=$type;
+        $data['title']=$title;
+        $result=Db::name('draw_money_account')->where(['type'=>$type,'user_id'=>$this->member_id])->update($data);
+        if($result>0){
+        	die(json_encode(['resultCode' => 0,'message' => '修改成功' ,'data' => $result]));
+        }else{
+        	die(json_encode(['resultCode'=>9026,'error' => $this->err['9026']]));
+        }
+    }
      /*
      * 用户的喜欢视频列表
      */
@@ -181,7 +235,7 @@ class Memberservice extends Baseservice
        	$member[0]['fansnum']=Db::name('member_collection')->where(['cid'=>$uid])->count('id');//用户粉丝数
        	$member[0]['follownum']=Db::name('member_collection')->where(['uid'=>$uid])->count('id');//用户关注数
        	$member[0]['fabulous']=Db::name('video')->where('user_id',$uid)->sum('good');        //获取用户被点赞数
-       	$member[0]['birthday']=date('Y-m-s',$member[0]['birthday']);//转换生日
+       	$member[0]['birthday']=date('Y-m-d',$member[0]['birthday']);//转换生日
        	//获取用户地区名
        	if($member[0]['region']!=0){
        		$distr=Db::name('district')->field('name')->where('id',$member[0]['region'])->select();
@@ -189,6 +243,20 @@ class Memberservice extends Baseservice
        	}else{
        		$member[0]['regionname']='中国';
        	}
+       	$time=time();
+       	//判断是不是vip用户(1是；0否)
+       	if($member[0]['out_time']>$time || $member[0]['is_permanent']==1){
+       		$member[0]['isvip']=1;
+       		if($member[0]['is_permanent']==1){
+       			$member[0]['vipinfo']='永久会员';
+       		}else{
+       			$member[0]['vipinfo']=date('Y-m-d',$member[0]['out_time']);
+       		}
+       	}else{
+       		$member[0]['isvip']=0;
+       		$member[0]['vipinfo']='';
+       	}
+       	
         die(json_encode(['resultCode' => 0,'message' => '获取个人信息成功','data' => $member[0]]));
     }
     /*
@@ -253,6 +321,7 @@ class Memberservice extends Baseservice
         $sex = $request->post('sex')?$request->post('sex'):1;
         $birthday = $request->post('birthday')?strtotime($request->post('birthday')):time();
         $img = $request->file('fileimg');
+        $tel = $request->post('tel')?$request->post('tel'):'';
         $region = $request->post('region')?$request->post('region'):0; 
          //判断账号是否已存在
         if($uname){
@@ -260,7 +329,7 @@ class Memberservice extends Baseservice
         	if($isuname>0) die(json_encode(['resultCode'=>9009,'error' => $this->err['9009']]));
         }
         
-         $imgInfo = array();
+        $imgInfo = array();
         if($uid){
             $movePath = ROOT_PATH . $this->resource_path . $uid;
         } else{
@@ -284,6 +353,7 @@ class Memberservice extends Baseservice
        	    'introduce'=> removeXss($introduce),
        		'sex'      => $sex,
        		'birthday' => $birthday,
+       		'tel' => $tel,
        	];
        	if($img){
        		$update['headimgurl']=$imgInfo['saveName'];
@@ -640,17 +710,63 @@ class Memberservice extends Baseservice
         if(!$canbuy){
             die(json_encode(['resultCode' => 9017, 'error' => $this->err['9017']]));
         }
+        $time =time();
+        $gold=$video['gold'];
+        //计算分成后可以拿多少金币
+        if(!empty(get_config('video_royalty')) && get_config('video_royalty')>0){
+        	$gold=$video['gold']*get_config('video_royalty')/100;
+        }
+        $userinfo = Db::name('member')->field('pid')->where(['id'=>$this->member_id])->find();
+        $pid = $userinfo['pid'];//代理商id
+        $agentgold =0;//代理商收入
+        unset($rdata);  //代理商金币记录
+        if($pid>0){
+        	if(!empty(get_config('video_royalty_agent')) && get_config('video_royalty_agent')>0){
+        		$agentgold=$video['gold']*get_config('video_royalty_agent')/100;
+        		$rdata['user_id'] = $pid;
+		        $rdata['gold'] = $agentgold; 
+		        $rdata['add_time'] = $time; 
+		        $rdata['module'] = 'agent'; 
+		        $rdata['rid'] = $vid; 
+		        $rdata['agent_uid'] = $this->member_id;
+		        $rdata['explain'] = '代理消费视频提成收入';
+        	}
+        }
         
-        unset($data);
+        unset($data);//视频购买记录
         $data['video_id'] = $vid;
         $data['user_id'] = $this->member_id;
         $data['user_ip'] = $request->ip();
         $data['gold'] = $video['gold'];
-        $data['view_time'] = time();
+        $data['view_time'] = $time;
         
-        $ret = Db::transaction(function() use($data){            
-            Db::name('video_watch_log')->insertGetId($data);
-            Db::name('member')->where(['id'=>$data['user_id']])->setDec('money', $data['gold']);
+        unset($ugolddata); //购买者金币记录
+        $ugolddata['user_id'] = $this->member_id;
+        $ugolddata['gold'] = '-'.$video['gold']; 
+        $ugolddata['add_time'] = $time; 
+        $ugolddata['module'] = 'video'; 
+        $ugolddata['rid'] = $vid; 
+        $ugolddata['explain'] = '购买视频内容消费'; 
+        
+        unset($vgolddata);//视频发布者金币记录
+        $vgolddata['user_id'] = $video['user_id'];
+        $vgolddata['gold'] = $gold; 
+        $vgolddata['add_time'] = $time; 
+        $vgolddata['module'] = 'video'; 
+        $ugolddata['rid'] = $vid; 
+        $vgolddata['explain'] = '视频收入'; 
+        
+        
+        $ret = Db::transaction(function() use($data,$gold,$video,$ugolddata,$vgolddata,$rdata,$agentgold,$pid){            
+            Db::name('video_watch_log')->insertGetId($data);//视频购买记录
+            Db::name('member')->where(['id'=>$data['user_id']])->setDec('money', $data['gold']);//购买会员减去金币
+            Db::name('member')->where(['id'=>$video['user_id']])->setInc('money', $gold);  //发视频会员收入金币
+            Db::name('gold_log')->insertGetId($ugolddata);
+            Db::name('gold_log')->insertGetId($vgolddata);
+            if($agentgold>0){
+            	Db::name('gold_log')->insertGetId($rdata);
+            	Db::name('member')->where(['id'=>$pid])->setInc('money', $agentgold); //代理商收入金币
+            }
         });
         
         if(!$ret){

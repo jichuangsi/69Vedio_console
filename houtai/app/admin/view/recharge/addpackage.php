@@ -41,7 +41,7 @@
             <div class="layui-input-inline">
                 <input type="text"  class="layui-input" name="price" autocomplete="off" placeholder="请填写套餐价格">
             </div>
-            <div class="layui-form-mid layui-word-aux">元</div>
+            <div class="layui-form-mid layui-word-aux">金币</div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">描述</label>

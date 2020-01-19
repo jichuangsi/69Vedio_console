@@ -44,6 +44,11 @@ class Baseservice extends Controller
         }
         
         $this->member_id = session('member_id');
+        //更新已过期的会员状态
+        $user = Db::name('member')->field('out_time,is_permanent,id,username,money,gid')->where(['id'=>$this->member_id])->select();
+        if($user[0]['out_time']<=time()&&$user[0]['is_permanent']!=1&&$user[0]['gid']==2){
+        	Db::name('member')->where(['id'=>$this->member_id])->update(['gid'=>1]);
+        }
         $this->resource_path = 'public' . DS . 'uploads' . DS;
         $this->httpType = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? 'https://' : 'http://';
         

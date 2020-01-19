@@ -35,9 +35,9 @@
                     {$vo['width']}×{$vo['height']}
                 </td>
                 <td class="font12">
-                    <a href="{:url('del?table=advertisement_position&id='.$vo['id'])}" class="layui-btn layui-btn-primary layui-btn-small j-tr-del"><i class="layui-icon">&#xe640;</i></a>
+                    <!--<a href="{:url('del?table=advertisement_position&id='.$vo['id'])}" class="layui-btn layui-btn-primary layui-btn-small j-tr-del"><i class="layui-icon">&#xe640;</i></a>-->
                     <a href="{:url('admin/poster/edit',['id'=>$vo['id']])}"  title="编辑"   class="layui-btn layui-btn-primary layui-btn-small j-iframe-pop"><i class="layui-icon">&#xe642;</i></a>
-                    <a   class="layui-btn layui-btn-primary layui-btn-small show" data-id="{$vo['id']}" title="查看代码"><i class="layui-icon">&#xe609;</i></a>
+                    <!--<a   class="layui-btn layui-btn-primary layui-btn-small show" data-id="{$vo['id']}" title="查看代码"><i class="layui-icon">&#xe609;</i></a>-->
                 </td>
             </tr>
             {/volist}

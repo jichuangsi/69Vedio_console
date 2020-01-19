@@ -383,9 +383,16 @@ class Video extends Admin
     function upload(Request $request){
         if ($this->request->isPost()) {
             $videodb=$this->myDb->name('video');
+            $member=$this->myDb->name('member');
             //视频资料
             $videoinfo=$request->post('video/a');
             $tag=$request->post('tag/a',[0]);
+            if($videoinfo['user_id']>0){
+            	$usercount=$member->where('id',$videoinfo['user_id'])->count();
+            	if($usercount==0){
+            		return $this->error('该用户不存在',url());
+            	}
+            }
             $videoinfo['tag']=implode(',',$tag) ;
             $videoinfo['add_time']= time();
             $videoinfo['update_time']= time();

@@ -55,7 +55,7 @@ class Comment extends Admin
             'novel' => 3,
         );
         $where = 'resources_type ='.$resources_type_value[$type];
-        $order = 'status asc,last_time desc';
+        $order = 'status asc,add_time desc';
         $list = $this->myDb->view('Comment')
             ->view('member','username','ms_comment.send_user=member.id','LEFT')
             ->view($type,'title','ms_comment.resources_id='.$type.'.id','LEFT')

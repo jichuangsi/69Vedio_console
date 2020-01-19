@@ -23,7 +23,7 @@
                 <th width="70px;">所属会员</th>
                 <th width="300px;">内容</th>
                 <th width="90px;">资源</th>
-                <th width="90px;">更新时间</th>
+                <th width="90px;">发表时间</th>
                 <th width="70px;">状态</th>
                 <th width="70px;">操作</th>
             </tr>
@@ -49,7 +49,7 @@
                         <br/>
                         名称：{$vo['title']}
                 </td>
-                <td class="font12">{:date('Y-m-d H:i',$vo['last_time'])}</td>
+                <td class="font12">{:date('Y-m-d H:i',$vo['add_time'])}</td>
                 <td class="font12">
                     {if condition="$vo['status'] eq 1"}
                     <span style="color:green">已通过</span>

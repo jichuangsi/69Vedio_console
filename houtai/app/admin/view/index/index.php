@@ -99,18 +99,30 @@
 </div>
 
 <!-- 新增会员走势 start -->
-<!--<div id="container" class="col-md6"></div>
-<div id="viewVideoMonthCharts" class="col-md6"></div>
-<div id="viewAtlasMonthCharts" class="col-md6"></div>
-<div id="viewNovelMonthCharts" class="col-md6"></div>-->
+<div style="clear: both;width: 96%;">
+	<div id="container" class="col-md6" style="width: 100%;"></div>
+	<div id="videoNew" class="col-md6" style="width: 100%;"></div>
+	<div id="viewVideoMonthCharts" class="col-md6" style="width: 100%;"></div>
+	<!--<div id="viewAtlasMonthCharts" class="col-md6"></div>
+	<div id="viewNovelMonthCharts" class="col-md6"></div>-->
+</div>
+<!--<script src="__ADMIN_JS__/layui/layui.js"></script>-->
+<script type="text/javascript" src="__ADMIN_JS__/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/echarts-gl.min.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/ecStat.min.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/dataTool.min.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/china.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/world.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/bmap.min.js"></script>
+<script type="text/javascript" src="__ADMIN_JS__/echarts/simplex.js"></script>
 <!--<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>no
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>no
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
 <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>-->
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>no-->
 
 {if isset($data['memberMonthList'])}
 <script type="text/javascript">
@@ -122,7 +134,7 @@
     option = {
         title: {
             left: 'center',
-            text: '近12个月新增会员走势',
+            text: '近30天新增会员走势',
         },
         tooltip: {
             trigger: 'axis',
@@ -151,6 +163,45 @@
 </script>
 {/if}
 
+{if isset($data['videoNewMonthList'])}
+<script type="text/javascript">
+    function createViewVideoCharts(){
+    var dom = document.getElementById("videoNew");
+    var myChart = echarts.init(dom);
+    var app = {};
+    option = null;
+    option = {
+        title: {
+            left: 'center',
+            text: '近30天新增视频走势',
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        xAxis: {
+            type: 'category',
+            data: [{$data['videoNewMonthList']['month']}]
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: [{$data['videoNewCountList']['count']}],
+            type: 'line',
+            smooth: true
+        }]
+    };
+
+    if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+    }}
+    setTimeout(createViewVideoCharts,1000);
+</script>
+{/if}
+
 {if isset($data['viewVideoMonthList'])}
 <script type="text/javascript">
     function createViewVideoCharts(){
@@ -161,7 +212,7 @@
     option = {
         title: {
             left: 'center',
-            text: '近12个月视频消费走势',
+            text: '近30天视频消费走势',
         },
         tooltip: {
             trigger: 'axis',
@@ -269,7 +320,7 @@
 {/if}
 
 
-<div class="fr" style="width:49%;margin-top:150px;">
+<div class="fr" style="width:49%;margin-top:150px;display: none;">
     <table class="layui-table" lay-skin="line">
         <colgroup>
             <col width="160">
@@ -283,7 +334,7 @@
         <tbody>
         <tr>
             <td>产品名称</td>
-            <td>69视频</td>
+            <td>视频</td>
         </tr>
         <tr>
             <td>官方网站</td>
@@ -301,7 +352,7 @@
     </table>
 </div>
 
-<div style="width:49%;margin-top:150px;">
+<div class="fl" style="width:49%;margin-top:150px;display: none;">
     <table class="layui-table" lay-skin="line">
         <colgroup>
             <col width="160">

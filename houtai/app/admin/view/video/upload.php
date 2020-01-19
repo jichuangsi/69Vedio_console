@@ -30,6 +30,13 @@
             <input type="text" id="title" class="layui-input" name="video[title]" value="" autocomplete="off" placeholder="请填写">
         </div>
     </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-bg-gray">用户id：</label>
+        <div class="layui-input-inline">
+            <input type="number" id="userid" class="layui-input" name="video[user_id]" value="0" autocomplete="off" >
+        </div>
+        <div class="layui-form-mid layui-word-aux">视频属于哪个用户,默认是官方的(请先填写用户id再上传视频和图片)</div> 
+    </div>
     <div class="layui-form-item"  style="display: none;">
         <label class="layui-form-label layui-bg-gray">视频推荐：</label>
         <div class="layui-input-inline">
@@ -48,7 +55,9 @@
         <div class="layui-input-inline">
             <input type="text" class="layui-input" name="video[gold]" value="" autocomplete="off" >
         </div>
-        <div class="layui-form-mid layui-word-aux"> *观看需要支付金币</div>  </div>
+        <div class="layui-form-mid layui-word-aux"> *观看需要支付金币</div> 
+    </div>
+    
 <!--	<div class="layui-form-item">
         <label class="layui-form-label layui-bg-gray">关键字：</label>
         <div class="layui-input-inline">
@@ -146,14 +155,24 @@
     	var path=resp.filePath;
     	console.log(path.slice(path.indexOf("uploads/")+8));
         $('#img_video_thumb').attr('src',resp.filePath);
-        $('#titlepic').val(path.slice(path.indexOf("uploads/")+8));
+        if($('#userid').val()>0){
+        	$('#titlepic').val(resp.filePath);
+        }else{
+        	$('#titlepic').val(path.slice(path.indexOf("uploads/")+8));
+        }
+        $('#userid').attr('readonly','true');
         layer.msg('上传缩略图完成',{time:500});
     }
     function afterUpVideo(resp){
         console.log(resp);
         var path=resp.filePath;
         console.log(path.slice(path.indexOf("uploads/")+8));
-        $('#odownpath1').val(path.slice(path.indexOf("uploads/")+8));
+        if($('#userid').val()>0){
+        	$('#odownpath1').val(resp.filePath);
+        }else{
+        	$('#odownpath1').val(path.slice(path.indexOf("uploads/")+8));
+        }
+        $('#userid').attr('readonly','true');
         layer.msg('上传视频完成',{time:500});
     }
     $(function(){

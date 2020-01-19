@@ -97,14 +97,39 @@
             </div>
             <div class="layui-form-mid layui-word-aux">第三方流量统计代码，前台调用时请先用 htmlspecialchars_decode函数转义输出</div>
         </div>
-
+		<fieldset class="layui-elem-field layui-field-title">
+            <legend>提成设置</legend>
+        </fieldset>
+        <div class="layui-form-item">
+            <label class="layui-form-label">视频提成</label>
+            <div class="layui-input-inline">
+                <input type="number" class="layui-input" min="1" name="video_royalty" value="{$config['video_royalty']}" autocomplete="off" placeholder="视频提成">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><span style="color: #333333;">%</span> 用户发布需要购买的视频可以获得多少金币(百分比)</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">代理商视频提成</label>
+            <div class="layui-input-inline">
+                <input type="number" class="layui-input" min="1" name="video_royalty_agent" value="{$config['video_royalty_agent']}" autocomplete="off" placeholder="视频提成">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><span style="color: #333333;">%</span> 用户购买视频的消费代理商获得的提成(百分比)</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">vip充值提成</label>
+            <div class="layui-input-inline">
+                <input type="number" class="layui-input" min="1" name="vip_royalty" value="{$config['vip_royalty']}" autocomplete="off" placeholder="视频提成">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><span style="color: #333333;">%</span> 用户充值vip代理商获得的提成(百分比)</div>
+        </div>
+        
+        
         <fieldset class="layui-elem-field layui-field-title">
             <legend>金币设置</legend>
         </fieldset>
         <div class="layui-form-item">
             <label class="layui-form-label">金币汇率</label>
             <div class="layui-input-inline">
-                <input type="text" class="layui-input" name="gold_exchange_rate" value="{$config['gold_exchange_rate']}" autocomplete="off" placeholder="金币跟人民币的比率">
+                <input type="number" class="layui-input" min="1" name="gold_exchange_rate" value="{$config['gold_exchange_rate']}" autocomplete="off" placeholder="金币跟人民币的比率">
             </div>
             <div class="layui-form-mid layui-word-aux">1元人民币可兑换的金币个数,如1元可兑换10金币则填写10</div>
         </div>
@@ -126,11 +151,17 @@
         <div class="layui-form-item">
             <label class="layui-form-label">提现最低限额</label>
             <div class="layui-input-inline">
-                <input type="text" class="layui-input" name="min_withdrawals" value="{$config['min_withdrawals']}" autocomplete="off" placeholder="输入最低提现金币数">
+                <input type="number" class="layui-input" min="1" name="min_withdrawals" value="{$config['min_withdrawals']}" autocomplete="off" placeholder="输入最低提现金币数">
             </div>
             <div class="layui-form-mid layui-word-aux">申请提现最低提现金币数</div>
         </div>
-
+		<div class="layui-form-item">
+            <label class="layui-form-label">提现手续费</label>
+            <div class="layui-input-inline">
+                <input type="number" class="layui-input" min="1" name="service_harge" value="{$config['service_harge']}" autocomplete="off" placeholder="输入提现手续费">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><span style="color: #333333;">%</span>申请提现收取的手续费(百分比)</div>
+        </div>
 
         <!--<fieldset class="layui-elem-field layui-field-title">
             <legend>奖励设置</legend>

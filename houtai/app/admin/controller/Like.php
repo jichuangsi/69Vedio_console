@@ -69,16 +69,13 @@ class Like extends Admin
         $pages = $data_list->render();
 
         foreach ($list['data'] as $k=>$v){
-          //  $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],1);
             if($list['data'][$k]['user_id']==0){
-//          	$list['data'][$k]['thumbnail'] =$this->getFronturl().$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
                 $list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail']);
                 $list['data'][$k]['user_id']='admin';
                 
             }else{
             	$username=$member->where(['id'=>$list['data'][$k]['user_id']])->select();
             	$list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail'],$list['data'][$k]['user_id']);
-//				$list['data'][$k]['thumbnail'] =$this->getFronturl()."/uploads/".$list['data'][$k]['user_id']."/".str_replace('\\','/',$list['data'][$k]['thumbnail']);
             	$list['data'][$k]['user_id']=$username[0]['nickname'];
             }
         }

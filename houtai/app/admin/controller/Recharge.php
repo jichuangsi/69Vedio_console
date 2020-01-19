@@ -35,12 +35,61 @@ class Recharge extends Admin
             if($item['buy_type']===2){
                 $item['buy_vip_info']=\json_decode($item['buy_vip_info'],true);
             }
+            $item['headimgurl'] = $this->getFronturl($item['headimgurl'],$item['user_id']);
             $items[]=$item;
         }
-
+        $price = array();
+        //金币总充值收入
+		$ptotal=$this->myDb->query("select sum(price) as cum from ms_order where status = 1 and buy_type = 1 ");
+		//近7日金币充值收入
+		$pmonth=$this->myDb->query("select sum(price) as cum from ms_order where status = 1 and buy_type = 1 and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(FROM_UNIXTIME(add_time, '%Y-%m-%d'))");
+		//今天金币充值收入金额
+		$pday=$this->myDb->query("select sum(price) as cum from ms_order where status = 1 and buy_type = 1 and FROM_UNIXTIME(add_time, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')");	
+        if(empty($ptotal[0]['cum'])){
+        	$price['ptotal']=0;
+        }else{
+        	$price['ptotal']=round($ptotal[0]['cum'],2);
+        }
+        if(empty($pmonth[0]['cum'])){
+        	$price['pmonth']=0;
+        }else{
+        	$price['pmonth']=$pmonth[0]['cum'];
+        }
+        if(empty($pday[0]['cum'])){
+        	$price['pday']=0;
+        }else{
+        	$price['pday']=$pday[0]['cum'];
+        }
+        $vip = array();
+        //金币总充值收入
+		$ptotal=$this->myDb->query("select sum(price) as cum from ms_order where status = 1 and buy_type = 2 ");
+		//近7日金币充值收入
+		$pmonth=$this->myDb->query("select sum(price) as cum from ms_order where status = 1 and buy_type = 2 and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(FROM_UNIXTIME(add_time, '%Y-%m-%d'))");
+		//今天金币充值收入金额
+		$pday=$this->myDb->query("select sum(price) as cum from ms_order where status = 1 and buy_type = 2 and FROM_UNIXTIME(add_time, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')");	
+        if(empty($ptotal[0]['cum'])){
+        	$vip['ptotal']=0;
+        }else{
+        	$vip['ptotal']=round($ptotal[0]['cum'],2);
+        }
+        if(empty($pmonth[0]['cum'])){
+        	$vip['pmonth']=0;
+        }else{
+        	$vip['pmonth']=$pmonth[0]['cum'];
+        }
+        if(empty($pday[0]['cum'])){
+        	$vip['pday']=0;
+        }else{
+        	$vip['pday']=$pday[0]['cum'];
+        }
         $pages = $data_list->render();
+        
+//      dump($count);exit;
+		
         $this->assign('data_list', $items);
         $this->assign('pages', $pages);
+        $this->assign('price' , $price);
+        $this->assign('vip' , $vip);
         return $this->fetch();
     }
 
@@ -75,12 +124,38 @@ class Recharge extends Admin
             ->paginate(20);
             
         $list=$data_list->toArray();
+        
+         $price = array();
+        //总消费
+		$ptotal=$this->myDb->query("select sum(gold) as cum from ms_{$table}_watch_log");
+		//近7日消费
+		$pmonth=$this->myDb->query("select sum(gold) as cum from ms_{$table}_watch_log where DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(FROM_UNIXTIME(view_time, '%Y-%m-%d'))");
+		//今天消费
+		$pday=$this->myDb->query("select sum(gold) as cum from ms_{$table}_watch_log where  FROM_UNIXTIME(view_time, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')");	
+        if(empty($ptotal[0]['cum'])){
+        	$price['ptotal']=0;
+        }else{
+        	$price['ptotal']=$ptotal[0]['cum'];
+        }
+        if(empty($pmonth[0]['cum'])){
+        	$price['pmonth']=0;
+        }else{
+        	$price['pmonth']=$pmonth[0]['cum'];
+        }
+        if(empty($pday[0]['cum'])){
+        	$price['pday']=0;
+        }else{
+        	$price['pday']=$pday[0]['cum'];
+        }
+        
+        
         foreach($list['data'] as $k=>$v){
 			$list['data'][$k]['headimgurl']=$this->getFronturl($v['headimgurl'],$v['user_id']);
         }
         $pages=$data_list->render();
         $this->assign('pages',$pages);
         $this->assign('title',$title);
+        $this->assign('price' , $price);
         $this->assign('data_list',$list['data']);
         return $this->fetch();
     }

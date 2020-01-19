@@ -22,6 +22,7 @@ class Commentservice extends Baseservice
         '10004' => '指定资源不存在',
         '10005' => '参数缺少评论内容',        
         '10006' => '提交评论失败',
+        '10007' => '评论功能暂时关闭',
     ];
     
     /* private $member_id;
@@ -189,7 +190,9 @@ class Commentservice extends Baseservice
         if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-        
+        if(!get_config('comment_on')){
+        	die(json_encode(['resultCode' => 10007, 'error' => $this->err['10007']]));
+        }
         $vid = $request->param('vid/d', '');//视频id
         $pid = $request->param('pid/d', 0);//父评论id
         $tid = $request->param('tid/d', 0);//接受人id
@@ -223,7 +226,7 @@ class Commentservice extends Baseservice
         $data['content'] = removeXss($content);
         $data['resources_type'] = $resources_type;
         $data['resources_id'] = $vid;
-        $data['status'] = (get_config('comment_examine_on')  == 1) ?  0 : 1;
+        $data['status'] = (get_config('comment_examine_on')  == 1) ?  1 : 0;
         $data['add_time'] = time();
         $data['pid'] = $pid;
         

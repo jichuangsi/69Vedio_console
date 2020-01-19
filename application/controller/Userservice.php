@@ -225,8 +225,11 @@ class Userservice extends Controller
         
         if(!$uid) return;
         
-        $user = Db::name('member')->field('id,username,money,gid')->where(['id'=>$uid])->select();
-        
+        $user = Db::name('member')->field('out_time,is_permanent,id,username,money,gid')->where(['id'=>$uid])->select();
+        if($user[0]['out_time']<=time()&&$user[0]['is_permanent']!=1&&$user[0]['gid']==2){
+        	Db::name('member')->where(['id'=>$uid])->update(['gid'=>1]);
+        	$user = Db::name('member')->field('id,username,money,gid')->where(['id'=>$uid])->select();
+        }
         if($user){
             $sessionUserInfo = [
                 'userid' => $uid,

@@ -34,13 +34,45 @@
 
         <div class="layui-form-item">
             <!-- <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label> -->
-            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数</label>
+            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数(1)</label>
             <div class="layui-input-inline">
                 <input type="number"  class="layui-input" name="look_at_num_mobile" value="{$config['look_at_num_mobile']}" autocomplete="off" placeholder="请填写可试看数量">
             </div>
-             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数</div> 
+             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数<b style="color: #333;">(基础次数)</b></div> 
         </div>
-
+		<div class="layui-form-item">
+            <!-- <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label> -->
+            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数(2)</label>
+            <div class="layui-input-inline">
+                <input type="number"  class="layui-input" name="look_at_num_mobile2" value="{$config['look_at_num_mobile2']}" autocomplete="off" placeholder="请填写可试看数量">
+            </div>
+             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数<b style="color: #333;">(推荐2人以上)</b></div> 
+        </div>
+        <div class="layui-form-item">
+            <!-- <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label> -->
+            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数(3)</label>
+            <div class="layui-input-inline">
+                <input type="number"  class="layui-input" name="look_at_num_mobile3" value="{$config['look_at_num_mobile3']}" autocomplete="off" placeholder="请填写可试看数量">
+            </div>
+             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数<b style="color: #333;">(推荐5人以上)</b></div> 
+        </div>
+        <div class="layui-form-item">
+            <!-- <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label> -->
+            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数(4)</label>
+            <div class="layui-input-inline">
+                <input type="number"  class="layui-input" name="look_at_num_mobile4" value="{$config['look_at_num_mobile4']}" autocomplete="off" placeholder="请填写可试看数量">
+            </div>
+             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数<b style="color: #333;">(推荐10人以上)</b></div> 
+        </div>
+        <div class="layui-form-item">
+            <!-- <label class="layui-form-label" id="look_at_num"><b>手机</b>试看部数</label> -->
+            <label class="layui-form-label" id="look_at_num"><b>免费视频</b>试看部数(5)</label>
+            <div class="layui-input-inline">
+                <input type="number"  class="layui-input" name="look_at_num_mobile5" value="{$config['look_at_num_mobile5']}" autocomplete="off" placeholder="请填写可试看数量">
+            </div>
+             <div class="layui-form-mid layui-word-aux" id="look_at_tpis" >普通用户每日的观看次数<b style="color: #333;">(推荐20人以上)</b></div> 
+        </div>
+        
         <div class="layui-form-item">
             <div class="layui-input-block">
                 <input type="hidden" class="field-id" name="id">

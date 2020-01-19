@@ -27,10 +27,25 @@ class Resetmemberinfo extends Command
     }
     
     private function resetCommonMember(){
-        Db::name("member")->where(['gid'=>1])->update(['try_and_see'=>get_config('look_at_num_mobile')]);
+    	$userlist=Db::name('member')->field('id')->where(['gid'=>1])->select();
+        foreach($userlist as $k=>$v){
+        	$pcount=Db::name('member')->where(['pid'=>$v['id']])->count();
+        	if($pcount<2){
+        		Db::name("member")->where(['gid'=>1,'id'=>$v['id']])->update(['try_and_see'=>get_config('look_at_num_mobile')]);
+        	}else if($pcount<5){
+        		Db::name("member")->where(['gid'=>1,'id'=>$v['id']])->update(['try_and_see'=>get_config('look_at_num_mobile2')]);
+        	}else if($pcount<10){
+        		Db::name("member")->where(['gid'=>1,'id'=>$v['id']])->update(['try_and_see'=>get_config('look_at_num_mobile3')]);
+        	}else if($pcount<20){
+        		Db::name("member")->where(['gid'=>1,'id'=>$v['id']])->update(['try_and_see'=>get_config('look_at_num_mobile4')]);
+        	}else if($pcount>=20){
+        		Db::name("member")->where(['gid'=>1,'id'=>$v['id']])->update(['try_and_see'=>get_config('look_at_num_mobile5')]);
+        	}
+        }
+//      Db::name("member")->where(['gid'=>1])->update(['try_and_see'=>get_config('look_at_num_mobile')]);
     }
     
     private function resetVipMember(){
-        Db::name('member')->where(['gid'=>2,'out_time'=>['<=', time()]])->update(['gid'=>1,'out_time'=>NULL]);
+        Db::name('member')->where(['gid'=>2,'out_time'=>['<=', time()],'is_permanent'=>0])->update(['gid'=>1,'out_time'=>NULL]);
     }
 }

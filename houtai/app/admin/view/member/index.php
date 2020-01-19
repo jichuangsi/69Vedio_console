@@ -25,8 +25,8 @@
                 <div class="layui-input-inline layui-form">
                     <select name="key" lay-verify="">
                         <option value="nickname" {if condition="$keys eq 'nickname'"}selected="selected"{/if}>昵称</option>
-                        <!--<option value="tel" {if condition="$keys eq 'tel'"}selected="selected"{/if} >手机号</option>
-                        <option value="email" {if condition="$keys eq 'email'"}selected="selected"{/if}>邮箱</option>-->
+                        <option value="tel" {if condition="$keys eq 'tel'"}selected="selected"{/if} >手机号</option>
+                        <!--<option value="email" {if condition="$keys eq 'email'"}selected="selected"{/if}>邮箱</option>-->
                     </select>
                 </div>
                 <div class="layui-input-inline">
@@ -58,11 +58,11 @@
         <tbody>
             {volist name="data_list" id="vo"}
             <tr>
-                <td><input type="checkbox" name="ids[]" class="layui-checkbox checkbox-ids" value="{$vo['id']}" lay-skin="primary"></td>
+                <td><input type="checkbox" name="ids[]" class="layui-checkbox checkbox-ids" value="{$vo['id']}" lay-skin="primary">{$vo['id']}</td>
                 <td class="font12">
-                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl">
+                    <img src="{if condition="$vo['headimgurl']"}{$vo['headimgurl']}{else /}__ADMIN_IMG__/avatar.png{/if}" width="60" height="60" class="fl" onerror="onerror=null;src='__ADMIN_IMG__/avatar.png'">
                     <!--<p class="ml10 fl">{$vo['nickname']} &nbsp; ({$vo['username']})<br>手机：{$vo['tel']|default="-"}<br>邮箱：{$vo['email']}</p>-->
-                    <p class="ml10 fl">{$vo['nickname']} </p>
+                    <p class="ml10 fl">{$vo['nickname']}&nbsp; ({$vo['username']})<br>手机：{$vo['tel']|default="-"}<br> </p>
                 </td>
                 <td class="font12">{if $vo['is_permanent']==1}永久VIP{elseif $vo['out_time']>time()}VIP{else/}普通用户{/if}</td>
                 <td class="font12">余额：{$vo['money']}</td>
