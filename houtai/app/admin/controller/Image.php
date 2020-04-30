@@ -20,6 +20,7 @@ class Image extends  Admin
     public function imgcheck(Request $request){
         $atlasdb=$this->myDb->name('atlas');
         $class=$this->myDb->name('class');
+        $member=$this->myDb->name('member');
         $select=$request->get('select/d',1);
         $key=$request->get('key/s','');
         $cla=$request->get('class/d',0);
@@ -57,6 +58,11 @@ class Image extends  Admin
             $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],2);
             if( $list['data'][$k]['user_id']==0){
                 $list['data'][$k]['user_id']='admin';
+                $list['data'][$k]['cover'] = $this->getFronturl($list['data'][$k]['cover']);
+            }else{
+            	$username=$member->where(['id'=>$list['data'][$k]['user_id']])->select();
+            	$list['data'][$k]['cover'] = $this->getFronturl($list['data'][$k]['cover'],$list['data'][$k]['user_id']);
+            	$list['data'][$k]['user_id']=$username[0]['nickname'];
             }
         }
         $classlist=$class->where(['type'=>2,'pid'=>0])->select();
@@ -215,6 +221,7 @@ class Image extends  Admin
     public function lists(Request $request){
         $atlasdb=$this->myDb->name('atlas');
         $class=$this->myDb->name('class');
+        $member=$this->myDb->name('member');
         $select=$request->get('select/d',1);
         $key=$request->get('key/s','');
         $cla=$request->get('class/d',0);
@@ -252,6 +259,11 @@ class Image extends  Admin
             $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],2);
             if( $list['data'][$k]['user_id']==0){
                 $list['data'][$k]['user_id']='admin';
+                $list['data'][$k]['cover'] = $this->getFronturl($list['data'][$k]['cover']);
+            }else{
+            	$username=$member->where(['id'=>$list['data'][$k]['user_id']])->select();
+            	$list['data'][$k]['cover'] = $this->getFronturl($list['data'][$k]['cover'],$list['data'][$k]['user_id']);
+            	$list['data'][$k]['user_id']=$username[0]['nickname'];
             }
         }
 

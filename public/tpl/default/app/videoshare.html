@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>69短视频</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="__ROOT__/tpl/default/app/static/js/reset.js"></script>
+    <script type="text/javascript" src="__ROOT__/tpl/default/app/static/js/equipInfo.js"></script>
+    <script type="text/javascript" src="__ROOT__/tpl/default/static/js/jquery-3.2.1.min.js"></script>
+  	<script type="text/javascript" src="__ROOT__/tpl/default/static/js/layer/layer.js"></script>
+    <style>
+    	body{
+    		background-color: #100909;
+    	}
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .video{
+        	width: 100%;
+        	height: 5rem;
+        }
+        .video video{
+        	width: 100%;
+        	height: 100%;
+        }
+        .user{
+        	padding-left: 0.4rem;
+        	display: flex;
+		    color: #fff;
+		    font-size: 0.3rem;
+        }
+        .userimg{
+        	width: 1.3rem;
+    		height: 1.3rem;
+        }
+        .userimg img{
+        	width: 100%;
+		    height: 100%;
+		    border-radius: 50%;
+        }
+        .info{
+        	font-size: 0.3rem;
+        	padding-left: 0.2rem;
+        	width: 4rem;
+    		line-height: 1.3rem;
+    		overflow: hidden;
+		    white-space: nowrap;
+		    text-overflow: ellipsis;
+        }
+        .title{
+        	margin: 0.2rem 0;
+        	color: #fff;
+        	width: 96%;
+        	font-size: 0.25rem;
+        	padding-left: 0.4rem;
+        	padding-right: 0.2rem;
+        }
+        .follow div{
+        	background-color: red;
+		    height: 0.7rem;
+		    width: 1.2rem;
+		    text-align: center;
+		    line-height: 0.7rem;
+		    border-radius: 0.4rem;
+		    margin-top: 0.25rem;
+        }
+        .jc{
+        	font-size: 0.25rem;
+		    color: #fff;
+		    display: flex;
+		    line-height: 0.5rem;
+        }
+        .jc div{
+        	width: 0.05rem;
+		    height: 0.5rem;
+		    background-color: red;
+		    margin-left: 0.2rem;
+		    margin-right: 0.1rem;
+        }
+        .marvellous{
+        	padding-right: 0.2rem;
+        	display: flex;
+        	flex-wrap: wrap;
+        	padding-left: 0.2rem;
+        }
+        .marvellous div img{
+        	width: 2rem;
+        	height: 3rem;
+        }
+        .marvellous div{
+        	width: 30%;
+        	padding: 0.1rem;
+        	margin: 0.1rem;
+        }
+        video::-internal-media-controls-download-button {
+            display:none;
+        }
+        video::-webkit-media-controls-enclosure {
+            overflow:hidden;
+        }
+        video::-webkit-media-controls-panel {
+            width: calc(100% + 30px);
+        }
+    </style>
+    <script type="text/javascript">
+    var did;
+    var data;
+    $(function(){
+    	
+    	let a = u();
+        var data = {
+          sw: c("" + (window.screen.width || 0)),//设备屏幕宽度
+          sh: c("" + (window.screen.height || 0)),//设备屏幕高度
+          sp: window.devicePixelRatio,//设备像素比
+          gv: c(a.version || ""),//设备显卡版本
+          gr: c(a.renderer || ""),//设备显卡渲染器
+          uid: '{$u}',//邀请人uid
+        }
+        $.post('/Userservice/initDevice',data,function (e) {
+        	if(e.resultCode==0){
+        		did = e.data.did;
+        		//layer.msg(e.message, {icon: 6});
+        	}else{
+        		layer.msg('线路繁忙，请稍后再试！', {icon: 5});
+        	}
+        },'json');
+    });
+    </script>
+</head>
+<body>
+    <div class="box">
+        <div class="video">
+            <video id="video"  controls controlsList="nodownload" src="{$v['url']}" controls="controls"></video>
+        </div>
+        <div class="user">
+        	<div class="userimg">
+        		<img src="{$v['headimgurl']}" onerror="this.src='__ROOT__/tpl/default/app/static/images/logo.png'"/>
+        	</div>
+        	<div class="info">
+        		{$v['nickname']}
+        	</div>
+        	<div class="follow" onclick="zhifu()">
+        		<div>关注</div>
+        	</div>
+        </div>
+        <div class="title" onclick="set()">
+        	{$v['title']}
+        </div>
+        <div class="jc" onclick="get()"><div></div>发现更多精彩</div>
+        <div class="marvellous">
+        	{volist name='vlist' id='vi'}
+        	<div>
+        		<img src="{$vi.thumbnail}" onclick="go({$vi.id})" onerror="this.src='__ROOT__/tpl/default/app/static/images/logo.png'" />
+        	</div>
+        	{/volist}
+        </div>
+    </div>
+    <form action="http://192.168.31.123:96/gateway.php" method="GET" id="forms">
+    	<input type="hidden" id="amount" name="amount" value="{$v['money']}" />
+    	<input type="hidden" id="type" name="type" value="18" />
+    	<input type="hidden"  name="u" value="{$u}" />
+    	<input type="hidden"  name="v" value="{$v['id']}" />
+    </form>
+</body>
+<script>
+	function zhifu(){
+		alert($('#amount').val()+"~~"+$('#type').val());
+		$('#forms').submit();
+//		window.location.href='http://192.168.31.123:96/gateway.php?amount="12.00"&type=12';
+//		zdata={
+//			type : 12,
+//			amount : "2.00"
+//		}
+//		$.post('http://192.168.31.123:96/gateway.php',zdata,function(e){
+//			console.log(e);
+//		});
+	}
+	var myVideo=document.getElementById("video");  
+	if({$r}==1){
+		layer.msg('支付成功', {icon: 6});
+		myVideo.play();
+	}
+	if({$r}==2){
+		layer.msg('支付失败', {icon: 5});
+	}
+	function set(){
+		$.post('/App/setcookie',function(e){
+			console.log(e);
+		});
+	}
+	function go(vid){
+		location.href="/app/videoshare/u/{$u}/v/"+vid;
+	}
+	function get(){
+		$.post('/App/getcookie',function(e){
+			alert(e[0])
+			console.log(e)
+		});
+	}
+	var isplay=true;
+	
+	myVideo.addEventListener('play',function(){  
+//		myVideo.pause();
+		if({$v['gold']}==0){
+			console.log(33333333);
+			myVideo.play();
+			return;
+		}
+		var vdata={
+			u:"{$u}",
+			v:{$v['id']}
+		}
+		if(isplay){
+			myVideo.pause();
+			$.post("/app/queryvideo",vdata,function(e){
+				console.log(e);
+				if(e){
+					myVideo.play();
+					isplay=false;
+				}else{
+					var r=confirm("观看该视频需要支付后才能观看")
+				 	 if (r==true) {
+				 	 		zhifu();
+				  	  console.log("选择了支付");
+				 	 }else{
+				   	  console.log("取消了支付");
+			         }
+					console.log('false');
+				}
+			},'json');
+		}else{
+			myVideo.play();
+			console.log(1233333);
+		}
+	
+	});  
+	myVideo.addEventListener('pause',function(){
+//		myVideo.pause();
+	}) 
+</script>
+</html>

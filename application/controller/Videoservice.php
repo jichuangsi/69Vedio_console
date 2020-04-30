@@ -42,6 +42,8 @@ class Videoservice extends Baseservice
     
     private $video_default_ext = 'mp4,mov';
     
+    private $share_video_link;
+    
     /* private $member_id;
     
     private $resource_path;
@@ -83,6 +85,7 @@ class Videoservice extends Baseservice
         header('Access-Control-Max-Age: 1728000'); */
         
         parent::__construct($request);
+        $this->share_video_link = $this->httpType.$_SERVER['HTTP_HOST']."/app/videoshare/";
         
         $noAuthAct = ['upload','myvideos','latestvideos','payvideos','playmostvideos','likemostvideos','commentmostvideos','gettags','getclasses','homevideo','videocollection',
             'concernvideos','cancelcollection','videosearch','mybuyvideos','ftp','preview'
@@ -120,7 +123,6 @@ class Videoservice extends Baseservice
             die(json_encode(['resultCode' => -1,'message' => '未知错误']));
         }        
     }
-    
     /**
      * 远程预览服务例子
      * @param Request $request
@@ -135,7 +137,7 @@ class Videoservice extends Baseservice
         
         dump($result);
     }
-    
+   
     /*
      * 首页推荐视频
      */
@@ -143,20 +145,25 @@ class Videoservice extends Baseservice
 		if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-//      die(json_encode(['resultCode' => 0,'message' => '获取首页推荐视频成功','data' => '1231231']));
         $page = $request->post('page')?$request->post('page'):1;
         $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
         
+        $array=array('click desc','click asc,id asc','good desc','good desc,id desc','good desc,click asc','add_time desc');
+//  	if(!session('home_order')){
+//  		session('home_order',$array[rand(0,5)]);
+//  	}
+        $order=session('home_order')?$array[session('home_order')]:"add_time desc";
         unset($param);
         $uid=$this->member_id;
 //      $param['where'] = ['v.title'=>['like','%ff%']];
         $param['where'] = ['v.status'=>1,'v.recommend'=>1];
         $param['pager'] = array('page'=>$page, 'rows'=>$rows);
-        $param['order'] = 'add_time desc';
+        $param['order'] = $order;
         $videos=$this->fetchVideos($param);
         if(!empty($videos['videos'])){
         	foreach($videos['videos'] as $k=>$val){
-				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$uid,'video_id'=>$val['id']])->count();        		
+				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$uid,'video_id'=>$val['id']])->count(); 
+				$videos['videos'][$k]['sharevideourl']=$this->share_video_link.'u/'.createUidCode($uid).'/v/'.$val['id'];       		
 //      		$videos['videos'][$k]['url']='require("'.$val['url'].'")';
 //      		$videos['videos'][$k]['headimgurl']='require("'.$val['headimgurl'].'")';
 //      		$videos['videos'][$k]['thumbnail']='require("'.$val['thumbnail'].'")';
@@ -164,7 +171,7 @@ class Videoservice extends Baseservice
         }else{
         	$videos['videos']=array();
         }
-        die(json_encode(['resultCode' => 0,'message' => '获取推荐视频成功','data' => $videos]));
+        die(json_encode(['resultCode' => 0,'message' => $order,'data' => $videos]));
     }
     
     /**
@@ -443,6 +450,7 @@ class Videoservice extends Baseservice
         if(!empty($videos['videos'])){
         	foreach($videos['videos'] as $k=>$val){
 				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$val['id']])->count();        		
+        		$videos['videos'][$k]['sharevideourl']=$this->share_video_link.'u/'.createUidCode($this->member_id).'/v/'.$val['id'];
         	}
         }else{
         	$videos['videos']=array();
@@ -472,6 +480,7 @@ class Videoservice extends Baseservice
         if(!empty($videos['videos'])){
         	foreach($videos['videos'] as $k=>$val){
 				$videos['videos'][$k]['isgood']=DB::name('video_good_log')->where(['user_id'=>$this->member_id,'video_id'=>$val['id']])->count();        		
+        		$videos['videos'][$k]['sharevideourl']=$this->share_video_link.'u/'.createUidCode($this->member_id).'/v/'.$val['id'];      
         	}
         }else{
         	$videos['videos']=array();
@@ -729,12 +738,13 @@ class Videoservice extends Baseservice
             $videos = $query->select();
             $total = count($videos);
         }
-        //dump($query->getLastSql());
+//        dump($query->getLastSql());
         
         $returnData['currentPage'] = $currentPage;
         $returnData['total'] = $total;
         $returnData['videos'] = array();
         foreach($videos as &$v){
+        	$v['sharevideourl']=$this->share_video_link.'u/'.createUidCode($this->member_id).'/v/'.$v['id'];
             $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
             $v['preview'] = $this->getFullResourcePath($v['preview'],$v['user_id']);
             $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);

@@ -49,7 +49,6 @@ function createWebUploader(choseFileBtn, beginBtn, fileName, fileType, callBack,
         //layer.msg('获取上传服务器参数发生异常.');
     }
     var postUrl = upParams.data.post_url;   //公共上传属性,post提交地址
-
     var fileTypeData = null;
     switch (fileType) {
         case 'image':

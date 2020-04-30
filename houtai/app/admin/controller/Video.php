@@ -53,7 +53,7 @@ class Video extends Admin
 
         foreach ($list['data'] as $k=>$v){
             $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],1);
-            if( $list['data'][$k]['user_id']==0){
+            if($list['data'][$k]['user_id']==0){
             	$list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail']);
                 $list['data'][$k]['user_id']='admin';
             }else{
@@ -381,6 +381,7 @@ class Video extends Admin
      * @return mixed
      */
     function upload(Request $request){
+    	 $user = session('admin_user');
         if ($this->request->isPost()) {
             $videodb=$this->myDb->name('video');
             $member=$this->myDb->name('member');
@@ -419,6 +420,9 @@ class Video extends Admin
             }
             $insert=$videodb->insert($videoinfo);
             if($insert){
+            	if($user['role_id'] == 4){
+            		return $this->success('添加成功',url('upload'));
+            	}
                 return $this->success('添加成功',url('lists'));
             }
             return $this->error('哎呀，出错了！',url());
@@ -430,9 +434,10 @@ class Video extends Admin
         foreach ($classlist as $k=>$v){
             $classlist[$k]['childs']=$class->where(['pid'=>$v['id']])->select();
         }
-
+		
         //视频标签
         $tag_result=$tag->where(['type'=>1,'status'=>1])->select();
+        $this->assign('userinfo',$user);
         $this->assign('classlist',$classlist);
         $this->assign('tag_result',$tag_result);
       return $this->fetch();
@@ -541,15 +546,15 @@ class Video extends Admin
         //echo $where;die;
         //$data_list=$videodb->where($where)->order("id",'desc')->paginate(null,false,['query'=>$request->get()]);
         $data_list=$this->myDb->view('video','id,title,info,key_word,update_time,click,good,thumbnail,user_id,status,is_check,sort,type,gold,recommend')
-            ->view('class','name as class','video.class=class.id and class.type=1')
+            ->view('class','name as class','video.class=class.id and class.type=1','LEFT')
             ->where($where)->order("id",'desc')->cache(120)->paginate(null,false,['query'=>$request->get()]);
 
         $list=$data_list->toArray();
         $pages = $data_list->render();
-
+//		dump($this->myDb->getLastSql());
         foreach ($list['data'] as $k=>$v){
           //  $list['data'][$k]['class']=$this->GetClassname_ByClass($v['class'],1);
-            if( $list['data'][$k]['user_id']==0){
+            if($list['data'][$k]['user_id']==0){
                 $list['data'][$k]['user_id']='admin';
                 $list['data'][$k]['thumbnail'] = $this->getFronturl($list['data'][$k]['thumbnail']);
             }else{

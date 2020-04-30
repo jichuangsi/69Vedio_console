@@ -10,6 +10,7 @@ use think\Controller;
 use think\Exception;
 use think\Response;
 use think\Request;
+use think\Cookie;
 use think\Db;
 
 
@@ -44,7 +45,7 @@ class Userservice extends Controller
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE');
         header('Access-Control-Max-Age: 1728000');
         
-        $noAuthAct = ['register','initDevice'];
+        $noAuthAct = ['register','initDevice','homeorder'];
         
          if (!in_array(strtolower($request->action()), $noAuthAct)) {
              if ($request->isPost() && $request->isAjax()) {
@@ -61,7 +62,31 @@ class Userservice extends Controller
         $returnData = ['statusCode' => 5002, 'error' => $this->err['5002']];
         die(json_encode($returnData));
     }    
-    
+    /**
+     *获取首页推荐的随机排序数字
+     */
+    public function homeorder(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $home_order=session('home_order');
+        $rand=rand(0,5);
+        if($home_order==null || empty($home_order)){
+        	session('home_order',$rand);
+        }else{
+        	for($x=0; $x<=10; $x++){
+        		if($home_order==$rand){
+        			$rand=rand(0,5);
+        			continue;
+        		}else{
+        			session('home_order',$rand);
+        			break;
+        		}
+        	}
+        }
+		$ss=$home_order.'~~'.$rand.'~~'.session('home_order');
+		die(json_encode($ss));
+    }
     /**
      * 新用户注册，旧用户信息获取
      * @param Request $request
@@ -78,16 +103,16 @@ class Userservice extends Controller
         $gpu_renderer = $request->post('gr');
         $device_uuid = $request->post('du');
         
-        if(session('member_id')&&session('member_info')){
-            die(json_encode(['resultCode' => 0, 'message' => "通过session获取用户成功", 'data' => session('member_info')]));
-        }
+      if(session('member_id')&&session('member_info')){
+          die(json_encode(['resultCode' => 0, 'message' => "通过session获取用户成功", 'data' => session('member_info')]));
+      }
         
-        $uid = Db::name('devices')->field('uid')->where(['du'=>$device_uuid])->limit(1)->order("register_time DESC")->select();
-        
-        if($uid&&$uid[0]['uid']){            
-            $this->fetchMember($uid[0]['uid']);
-            die(json_encode(['resultCode' => 0, 'message' => "通过设备uuid获取用户成功", 'data' => session('member_info')]));
-        }
+      $uid = Db::name('devices')->field('uid')->where(['du'=>$device_uuid])->limit(1)->order("register_time DESC")->select();
+      
+      if($uid&&$uid[0]['uid']){            
+          $this->fetchMember($uid[0]['uid']);
+          die(json_encode(['resultCode' => 0, 'message' => "通过设备uuid获取用户成功", 'data' => session('member_info')]));
+      }
         
         unset($map);
         $map['sw'] = $screen_width;
@@ -160,7 +185,7 @@ class Userservice extends Controller
         $did = Db::name('devices')->insertGetId($devicedata);
         
         if($did){
-            die(json_encode(['resultCode' => 0, 'data'=>['did'=>$did], 'message' => '设备初始化成功']));
+            die(json_encode(['resultCode' => 0, 'data'=>['did'=>$puid], 'message' => '设备初始化成功']));
         }else{
             die(json_encode(['resultCode' => 5004, 'error' => $this->err['5004']]));
         }
@@ -197,7 +222,7 @@ class Userservice extends Controller
     
     private function createMember(Request $request, $puid=''){
         unset($userdata);
-        $userdata['nickname']=$userdata['username']='用户'.time().mt_rand(100,200);
+        $userdata['nickname']=$userdata['username']=time().mt_rand(100,200);
         $userdata['add_time']=time();
         $userdata['last_ip']=$request->ip();
         $userdata['sex']=1;

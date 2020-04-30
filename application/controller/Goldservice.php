@@ -88,7 +88,7 @@ class Goldservice extends Baseservice
             return Response::create()->send();
         }
         $goldlist=Db::name('gold_package')->field('*')->select();
-        $goldlist['gold_rate']=get_config('gold_exchange_rate');
+//      $goldlist['gold_rate']=get_config('gold_exchange_rate');
         die(json_encode(["resultCode" => 0,'message' => '获取金币套餐列表成功','data' => $goldlist]));
     }
     /*

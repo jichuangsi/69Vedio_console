@@ -1,4 +1,5 @@
-
+<script src="/static/js/jquery.2.1.4.min.js"></script>
+<script src="/static/js/XCommon.js"></script>
 <style>
     td{
         border-right: dashed 1px #c7c7c7;
@@ -11,11 +12,11 @@
         <a data-href="{:url('check?table=atlas&val=2')}" class="layui-btn layui-btn-primary j-page-btns"><i class="aicon ai-jinyong1"></i>拒绝</a>
         <a data-href="{:url('del?table=atlas')}" class="layui-btn layui-btn-primary j-page-btns confirm"><i class="aicon ai-jinyong"></i>删除</a>
     </div>
-<div  style="margin-left: 10px; display: inline-block;float: right; ">
+<div  style="margin-left: 10px; display: inline-block;float: right;">
         <div class="layui-input-inline">
             <select name="select" lay-verify="">
-                <option value="1" {if condition="$select eq 1"}  selected="selected"{/if}>图集ID</option>
-                <option value="2" {if condition="$select eq 2"}  selected="selected"{/if}>图集名称</option>
+                <option value="1" {if condition="$select eq 1"}  selected="selected"{/if}>图片ID</option>
+                <option value="2" {if condition="$select eq 2"}  selected="selected"{/if}>图片名称</option>
                 <option value="3" {if condition="$select eq 3"}  selected="selected"{/if}>关键字</option>
             </select>
         </div>
@@ -47,7 +48,7 @@
                 <th><input type="checkbox" lay-skin="primary" lay-filter="allChoose"></th>
                 <th width="40px;">ID</th>
                 <th width="70px;">封面图</th>
-                <th width="300px;">图集标题</th>
+                <th width="300px;">图片标题</th>
                 <th width="70px;">分类</th>
                 <th width="70px;">所属会员</th>
                 <th width="40px;">人气</th>
@@ -65,7 +66,7 @@
                 <td>{$vo['id']}</td>
                 <td>
                         <a href="{$vo['cover']}" target="pic">
-                        <img height="30" src="{$vo['cover']}">
+                        <img height="30" src="{$vo['cover']}" onmouseover="imgTips(this,{width:300})">
                         </a>
                 </td>
                 <td>{$vo['title']}</td>
@@ -85,8 +86,8 @@
                 <td>{:date('Y-m-d',$vo['update_time'])}</td>
                 <td>
                     <div class="layui-btn-group">
-                        <a href="{:url('admin/image/edit',['id'=>$vo['id']])}"  title="编辑" class="layui-btn layui-btn-primary layui-btn-small"><i class="layui-icon">&#xe642;</i></a>
-                        <a href="{:url('admin/image/imagelists',['id'=>$vo['id']])}" class="layui-btn layui-btn-primary layui-btn-small" title="添加图片"><i class="layui-icon">&#xe654;</i></a>
+                        <!--<a href="{:url('admin/image/edit',['id'=>$vo['id']])}"  title="编辑" class="layui-btn layui-btn-primary layui-btn-small"><i class="layui-icon">&#xe642;</i></a>
+                        <a href="{:url('admin/image/imagelists',['id'=>$vo['id']])}" class="layui-btn layui-btn-primary layui-btn-small" title="添加图片"><i class="layui-icon">&#xe654;</i></a>-->
                         <a data-href="{:url('del?table=atlas&ids='.$vo['id'])}"  title="删除" class="layui-btn layui-btn-primary layui-btn-small j-tr-del"><i class="layui-icon">&#xe640;</i></a>
                     </div>
                 </td>

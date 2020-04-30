@@ -43,6 +43,12 @@ class Memberservice extends Baseservice
         '9024' => '该视频不为免费',
         '9025' => '缺少参数',
         '9026' => '修改卡包信息失败',
+        '9027' => '以前观看过的视频不添加次数',
+        '9028' => '缺少图片',
+        '9029' => '上传相册图片失败',
+        '9030' => '缺少接收者id',
+        '9031' => '接收者id不存在',
+        '9032' => '添加聊天信息失败',
     ];
     
     /* private $member_id;
@@ -60,6 +66,8 @@ class Memberservice extends Baseservice
     private $authHeaders = ['multipart/form-data']; */
     
     private $share_link_pattern;
+    
+    private $share_video_link;
     
     public function __construct(Request $request)
     {
@@ -91,7 +99,10 @@ class Memberservice extends Baseservice
         
         $this->share_link_pattern = $this->httpType.$_SERVER['HTTP_HOST']."/share/";
         
-        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo','tryandsee','getcard','editcard'];
+        $this->share_video_link = $this->httpType.$_SERVER['HTTP_HOST']."/app/videoshare/";
+        
+        $noAuthAct = ['addconcern','delconcern','getfriends','getconcerns','getconcerneds','recommendconcerns','mylike','getmemberinfo','sharelink','editmemberinfo','buyvideo','tryandsee','getcard','editcard',
+        'uploadimg','getmyimg','usersearch','userchat','getchat','works','getchatlist'];
         
         if (!in_array(strtolower($request->action()), $noAuthAct)) {
             if ($request->isPost() && $request->isAjax()) {
@@ -109,6 +120,167 @@ class Memberservice extends Baseservice
         die(json_encode($returnData));
     } 
     
+    public function works(Request $request){
+		if (strtoupper($request->method()) == "OPTIONS") {
+	        return Response::create()->send();
+	    }
+       $words=array('我','你','他','是','神','吗','个','啊','个','事','放','改个','我是');
+	   $content="违禁词孤苦伶仃改个三姑婆奥德赛看姑婆撒旦未入网叫撒都发松岛枫没多少佛阿斯顿山东if阿斯顿们山东方面的撒对卷发iof将的撒圣诞节佛山大";
+	   $banned=$this->generateRegularExpression($words);
+	  //检查违禁词
+	   $res_banned=$this->check_words($banned,$content);
+	   if(count($res_banned)>0){
+	   		die(json_encode(['resultCode'=>0,'message' => '有检查敏感词','data' => $res_banned]));
+	   }else{
+	   		die(json_encode(['resultCode'=>0,'message' => '没有检查敏感词','data' => $res_banned]));
+	   }
+	    die(json_encode(['resultCode'=>0,'message' => '检查敏感词','data' => $res_banned]));
+    }
+    /*
+     * 获取聊天列表
+     */
+    public function getchatlist(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid=$this->member_id;
+        $query = new Query();
+//      $sts=$query->query("select * from ms_chat a where 30>(select count(*) from ms_chat b where b.send_user=".$uid." or b.to_user=".$uid.") order by a.add_time desc");
+        $chatlist=Db::name('chat')->where('send_user',$this->member_id)->whereOr('to_user',$this->member_id)->field('*')->group('send_user,to_user')->order('add_time desc')->select();
+        $test=array();
+        foreach($chatlist as $k=>$v){
+        	$user;
+        	$isfor=false;
+        	if($k>0){
+        		foreach($test as $kk=>$vv){
+        			if($vv['send_user']==$v['to_user'] && $vv['to_user']==$v['send_user']){
+        				if($v['add_time']>$vv['add_time']){
+        					die(json_encode(['resultCode'=>0,'message' => '获取聊天列表成功','data' => 123]));
+        					$chatlist[$kk]['add_time']=date('Y-m-d H:i:s',$v['add_time']);	
+        				}
+        				array_splice($chatlist,$k,1);
+        				$isfor=true;
+        			}
+        		}
+        	}
+        	if($isfor){
+        		continue;
+        	}
+        	$test[$k]['send_user']=$v['send_user'];
+        	$test[$k]['to_user']=$v['to_user'];
+        	$test[$k]['content']=$v['content'];
+        	$test[$k]['add_time']=$v['add_time'];
+        	
+        	if($v['send_user']==$this->member_id){
+        		$user=Db::name('member')->where('id',$v['to_user'])->field('id,nickname,headimgurl')->find();
+        	}else{
+        		$user=Db::name('member')->where('id',$v['send_user'])->field('id,nickname,headimgurl')->find();
+        	}
+        	if(empty($user)){
+        		array_splice($chatlist,$k,1);
+        	}
+        	$chatlist[$k]['userid']=$user['id'];
+        	$chatlist[$k]['nickname']=$user['nickname'];
+        	$chatlist[$k]['headimgurl']=$this->getFullResourcePath($user['headimgurl'], $user['id']);;
+        	$chatlist[$k]['add_time']=date('Y-m-d H:i:s',$v['add_time']);
+        }
+        $returnData['chatlist']=$chatlist;
+        die(json_encode(['resultCode'=>0,'message' => '获取聊天列表成功','data' => $returnData]));
+    }
+    /**
+     *获取聊天信息 
+     */
+    public function getchat(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $to_user=$request->post('tu');//聊天用户id
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        if(!empty($to_user) && $to_user>0){
+        	$ismem = Db::name('member')->where(['id'=>$to_user])->count('id');
+        	if($ismem==0){
+        		die(json_encode(['resultCode'=>9031,'error' => $this->err['9031']]));
+        	}
+        }else{
+        	die(json_encode(['resultCode'=>9030,'error' => $this->err['9030']]));
+        }
+        $returnData = $chats = array();
+        $currentPage=1;
+        $total=0;
+        $query = new Query();
+        $chatList=$query->name('chat')->field('*')->whereOr(['to_user'=>$to_user,'send_user'=>$to_user])->order('add_time desc')->paginate(['page'=>$page, 'list_rows'=>$rows],false);
+        $chats=$chatList->items();
+//  	dump($query->getLastSql());
+    	$returnData['currentPage'] = $chatList->currentPage();
+        $returnData['total'] = $chatList->total();
+        $returnData['chats'] = array();
+        foreach($chats as &$v){
+        	$v['add_time']=date('Y-m-d H:i:s',$v['add_time']);
+//      	if($v['status']!=1){
+//      		continue;
+//      	}
+        	array_push($returnData['chats'], $v);
+        }
+        die(json_encode(['resultCode'=>0,'message' => '获取聊天信息成功','data' => $returnData]));
+    }
+    /*
+     * 发送聊天信息
+     */
+    public function userchat(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $send_user=$request->post('su')?$request->post('su'):$this->member_id;//发送者id
+        $to_user=$request->post('tu');//接收者id
+        $c=$request->post('c')?$request->post('c'):'';//聊天内容
+        if(!empty($to_user) && $to_user>0){
+        	$ismem = Db::name('member')->where(['id'=>$to_user])->count('id');
+        	if($ismem==0){
+        		die(json_encode(['resultCode'=>9031,'error' => $this->err['9031']]));
+        	}
+        }else{
+        	die(json_encode(['resultCode'=>9030,'error' => $this->err['9030']]));
+        }
+        unset($data);
+        $data['send_user']=$send_user;
+        $data['to_user']=$to_user;
+        $data['add_time']=time();
+        $data['content']=$c;
+        $ret=Db::name('chat')->insertGetId($data);
+        if($ret>0){
+        	die(json_encode(['resultCode'=>0,'message' => '发送信息成功','data' => $ret]));
+        }else{
+        	die(json_encode(['resultCode' => 9032,'error' => $this->err['9032']]));
+        }
+    }
+    /*
+     * 搜索名称和账号
+     */
+    public function usersearch(Request $request){
+    	if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $returnData = $users = array();
+        $currentPage=1;
+        $total=0;
+        $u=$request->post('u');
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        $query = new Query();
+        $userList=$query->name('member')->field('id,gid,username,tel,nickname,headimgurl,is_permanent,sex')->whereOr(['username'=>['like','%'.$u.'%'],'nickname'=>['like','%'.$u.'%']])->paginate(['page'=>$page, 'list_rows'=>$rows],false);
+    	$users=$userList->items();
+//  	dump($query->getLastSql());
+    	$returnData['currentPage'] = $userList->currentPage();
+        $returnData['total'] = $userList->total();
+        $returnData['users'] = array();
+        foreach($users as $k=>$v){
+        	$v['headimgurl'] = $this->getFullResourcePath($v['headimgurl'], $v['id']);
+        	$v['concerned']=$this->checkisfollow($this->member_id,$v['id']);
+        	array_push($returnData['users'], $v);
+        }
+       die(json_encode(['resultCode'=>0,'message' => '搜索账号和昵称成功' ,'data' => $returnData])); 
+    }
     /*
      * 获取卡包信息(支付宝、银行卡)
      */
@@ -199,6 +371,7 @@ class Memberservice extends Baseservice
         $returnData['total'] = $total;
         $returnData['videos'] = array();
         foreach($videos as &$v){
+        	$v['sharevideourl']=$this->share_video_link.'u/'.createUidCode($this->member_id).'/v/'.$v['id'];
             $v['url'] = $this->getFullResourcePath($v['url'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['url']);
             $v['thumbnail'] = $this->getFullResourcePath($v['thumbnail'],$v['user_id']);//$this->httpType.$_SERVER['HTTP_HOST']."/uploads/".str_replace('\\','/',$v['thumbnail']);
             if($v['user_id']===0){
@@ -304,6 +477,73 @@ class Memberservice extends Baseservice
 		 }
 		 return $y;
 //		 return ($y==0?'':$y.'岁').($m==0?'':$m.'个月').($d==0?'':$d.'天');
+	}
+	/**
+	 *获取个人相册图片 
+	 */
+	public function getmyimg(Request $request){
+		if (strtoupper($request->method()) == "OPTIONS") {
+            return Response::create()->send();
+        }
+        $uid=$request->post('uid')?$request->post('uid'):$this->member_id;
+        
+        $page = $request->post('page')?$request->post('page'):1;
+        $rows = $request->post('rows')?$request->post('rows'):$this->listRows;
+        
+        $returnData = $imgs= array();
+        
+        $query = new Query();
+        $imgList=$query->name('atlas')->field('*')->where('user_id',$uid)->paginate(['page'=>$page, 'list_rows'=>$rows],false);
+		$imgs=$imgList->items();
+		$returnData['currentPage'] = $imgList->currentPage();
+        $returnData['total'] = $imgList->total();
+        $returnData['imgs']=array();
+        foreach($imgs as &$v){
+        	$v['cover'] = $this->getFullResourcePath($v['cover'],$uid);
+        	array_push($returnData['imgs'], $v);
+        }
+        die(json_encode(['resultCode' => 0,'message' => '获取个人图片成功','data' => $returnData]));
+	}
+	/**
+     * 上传个人相册图片
+     */
+	public function uploadimg(Request $request){
+		$img = $request->file('img');
+		$imgInfo = array();
+		$uid   =  $this->member_id;
+        if($uid){
+            $movePath = ROOT_PATH . $this->resource_path . $uid;
+        } else{
+            $movePath = ROOT_PATH . $this->resource_path;
+        }
+        if($img){
+            unset($info);
+            $info = $img->validate(['size'=>1048576*10,'ext'=>'jpg,png,gif,jpeg'])->move($movePath);
+            if($info){
+                $imgInfo['ext'] = $info->getExtension();
+                $imgInfo['saveName'] = $info->getSaveName();
+                $imgInfo['fileName'] = $info->getFilename();
+            }else{
+            	die(json_encode(['resultCode' => 9010,'error' => $img->getError()]));
+            }
+        }else{
+        	die(json_encode(['resultCode' => 9028,'error' => $this->err['9028']]));
+        } 
+        unset($data);
+       	$data=[
+       	    'add_time' => time(),
+       	    'update_time'=> time(),
+       		'user_id'      => $uid,
+       	];
+       	if($img){
+       		$data['cover']=$imgInfo['saveName'];
+       	}
+       	$aid = Db::name('atlas')->insertGetId($data);
+       	if($aid){
+       		die(json_encode(['resultCode' => 0,'message' => '上传图片成功','data' => $aid]));
+       	}else{
+       		die(json_encode(['resultCode' => 9029,'error' => $this->err['9029']]));
+       	}
 	}
    /**
      * 编辑个人用户信息 
@@ -503,10 +743,11 @@ class Memberservice extends Baseservice
         if (strtoupper($request->method()) == "OPTIONS") {
             return Response::create()->send();
         }
-        
+        $search=$request->post('s');
         unset($where);
         $where['c.uid'] = $this->member_id;
         $where['c.status'] = 1;
+        $where['m.nickname'] = ['like','%'.$search.'%'];
         
         unset($join);
         $join['table'] = 'member m';
@@ -517,7 +758,8 @@ class Memberservice extends Baseservice
         $param['where'] = $where;
         $param['order'] = 'm.username asc';
         
-        die(json_encode(['resultCode' => 0,'message' => "获取好友列表成功",'data' => $this->fetchMembers($param)]));
+//      die(json_encode(['resultCode' => 0,'message' => "获取好友列表成功",'data' => $this->fetchMembers($param)]));
+		die(json_encode(['resultCode' => 0,'message' => "获取好友列表成功",'data' => md5(123456)]));
     }
     
     /**
@@ -651,11 +893,12 @@ class Memberservice extends Baseservice
             
             $returnData = $this->fetchMembers($param);
         }
-        foreach($returnData['members'] as $k=>$v){
-        	//检查是否已经关注
-	        $returnData['members'][$k]['concerned']=$this->checkisfollow($this->member_id,$v['id']);
+        if($returnData!=null&& !empty($returnData)){
+	        foreach($returnData['members'] as $k=>$v){
+	        	//检查是否已经关注
+		        $returnData['members'][$k]['concerned']=$this->checkisfollow($this->member_id,$v['id']);
+	        }
         }
-        
         die(json_encode(['resultCode' => 0,'message' => "获取推荐关注成功",'data' => $returnData]));
     }    
     
@@ -719,6 +962,7 @@ class Memberservice extends Baseservice
         $userinfo = Db::name('member')->field('pid')->where(['id'=>$this->member_id])->find();
         $pid = $userinfo['pid'];//代理商id
         $agentgold =0;//代理商收入
+        
         unset($rdata);  //代理商金币记录
         if($pid>0){
         	if(!empty(get_config('video_royalty_agent')) && get_config('video_royalty_agent')>0){
@@ -731,6 +975,8 @@ class Memberservice extends Baseservice
 		        $rdata['agent_uid'] = $this->member_id;
 		        $rdata['explain'] = '代理消费视频提成收入';
         	}
+        }else{
+        	$rdata=array();
         }
         
         unset($data);//视频购买记录
@@ -792,15 +1038,23 @@ class Memberservice extends Baseservice
             die(json_encode(['resultCode' => 9012, 'error' => $this->err['9012']]));
         }
         
-        $user = Db::name('member')->field('gid,try_and_see')->where(['id'=>$this->member_id])->find();
-        if($user['gid']===1 && $user['try_and_see']===0){
-            die(json_encode(['resultCode' => 9022, 'error' => $this->err['9022']]));
-        }
-        
         $video = Db::name('video')->field('user_id,gold')->where(['id'=>$vid])->find();
         if(!$video){
             die(json_encode(['resultCode' => 9013, 'error' => $this->err['9013']]));
         }
+        $user = Db::name('member')->field('id,gid,try_and_see,is_permanent')->where(['id'=>$this->member_id])->find();
+        
+        $iswatch=Db::name('video_try_log')->where(['video_id'=>$vid, 'user_id'=>$this->member_id])->count('id');
+        if($user['is_permanent']==1){
+		        die(json_encode(['resultCode' => 0,'message' => "永久会员不统计次数",'data' => $user]));
+    	}
+        if($iswatch>0){
+        	die(json_encode(['resultCode' => 0,'message' => "以前观看过的视频不统计次数",'data' => $iswatch]));
+        }
+        if($user['gid']===1 && $user['try_and_see']===0 && $video['user_id']!==$this->member_id){
+            die(json_encode(['resultCode' => 9022, 'error' => $this->err['9022']]));
+        }
+        
         
         if($video['user_id']==$this->member_id){
             die(json_encode(['resultCode' => 9021, 'error' => $this->err['9021']]));
@@ -848,11 +1102,11 @@ class Memberservice extends Baseservice
         $where['cid'] = $uid;
     	$concerned = Db::name('member_collection')->where($where)->count('id');
     	if($concern>0&&$concerned>0){
-    		return 1;
+    		return 1;   //相互关注
     	}else if($concern>0){
-    		return 0;
+    		return 0;   //我关注了他
     	}else{
-    		return null;
+    		return null; //未关注
     	}
     }
     
@@ -864,7 +1118,7 @@ class Memberservice extends Baseservice
         
         $query = new Query();
         
-        $query->name('member_collection')->alias('c')->field('m.id,m.username,m.headimgurl,m.sex');
+        $query->name('member_collection')->alias('c')->field('m.id,m.username,m.nickname,m.headimgurl,m.sex');
         
         if(isset($param['join'])&&!empty($param['join'])){
             $query->join($param['join']['table'],$param['join']['on'],$param['join']['type']);

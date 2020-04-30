@@ -31,6 +31,11 @@ class Index extends Admin
      */
     public function index()
     {
+    	$user = session('admin_user');
+    	if($user['role_id']==4){
+    		return $this->success('页面跳转中...', url('video/upload'));
+    	}
+//  	
         $data=array();
         //获取系统信息
         $data['videocount']=$this->myDb->name('video')->count();//视频数量总数

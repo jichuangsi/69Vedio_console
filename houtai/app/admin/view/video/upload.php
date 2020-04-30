@@ -30,10 +30,15 @@
             <input type="text" id="title" class="layui-input" name="video[title]" value="" autocomplete="off" placeholder="请填写">
         </div>
     </div>
-    <div class="layui-form-item">
+    <div class="layui-form-item" {if $userinfo['role_id']==4} style="display: none;" {/if}>
         <label class="layui-form-label layui-bg-gray">用户id：</label>
         <div class="layui-input-inline">
-            <input type="number" id="userid" class="layui-input" name="video[user_id]" value="0" autocomplete="off" >
+        	{if $userinfo['role_id']==4} 
+        	 	<input type="number" id="userid" class="layui-input" name="video[user_id]" value="{$userinfo['uid']}" autocomplete="off" disabled="disabled">
+        	{else}
+        		<input type="number" id="userid" class="layui-input" name="video[user_id]" value="0" autocomplete="off" >
+        	{/if}
+           
         </div>
         <div class="layui-form-mid layui-word-aux">视频属于哪个用户,默认是官方的(请先填写用户id再上传视频和图片)</div> 
     </div>

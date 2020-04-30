@@ -102,6 +102,7 @@ class User extends Admin
             if($result !== true) {
                 return $this->error($result);
             }
+//          return $this->error($data['password']);
             unset($data['id']);
             $data['last_login_ip'] = '';
             $data['auth'] = '';

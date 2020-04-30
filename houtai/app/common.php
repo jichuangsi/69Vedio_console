@@ -873,7 +873,12 @@ function x_connect_webdatabase()
 {
     $myDb = null;
     $sessionUser = session('admin_user');
-    $dbconf = \think\Db::name('admin_user')->field('db_config')->where('id', '=', $sessionUser['uid'])->find();
+    if($sessionUser['role_id']==4){
+    	$dbconf = \think\Db::name('admin_user')->field('db_config')->order('id asc')->find();
+    }else{
+    	$dbconf = \think\Db::name('admin_user')->field('db_config')->where('id', '=', $sessionUser['uid'])->find();
+    }
+//  $dbconf = \think\Db::name('admin_user')->field('db_config')->where('id', '=', $sessionUser['uid'])->find();
     $dbconf = \json_decode($dbconf['db_config'], true);
     if ($dbconf) {
         //get upload config

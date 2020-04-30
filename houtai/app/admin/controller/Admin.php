@@ -158,6 +158,9 @@ class Admin extends Common
         if ($table == 'comment' ) {
             $this->myDb->name($table)->where($map)->setField('last_time', time());
         }
+        if ($table == 'chat' ) {
+            $this->myDb->name($table)->where($map)->setField('last_time', time());
+        }
         if ($table == 'agent_apply'){
             $last_time = time();
             $datas[$field] = $val;

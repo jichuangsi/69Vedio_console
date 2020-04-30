@@ -138,6 +138,9 @@ class Member extends Admin
             if($result !== true) {
                 return $this->error($result);
             }
+            if($data['out_time']){
+            	$data['gid']=2;
+            }
             $this->myDb->name('member')->where($where)->update($data);
             /*
             if (!MemberModel::update($data)) {

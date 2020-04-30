@@ -70,7 +70,7 @@
           uid: '{$u}',//邀请人uid
         }
         //console.log(data);
-        
+       
         $.post('/Userservice/initDevice',data,function (e) {
         	if(e.resultCode==0){
         		did = e.data.did;
@@ -106,6 +106,7 @@
         <div class="img">
             <img src="__ROOT__/tpl/default/app/static/images/logo.png" alt="">
         </div>
+        
         <div class="center">
             <div class="title">69短视频</div>
             <div>

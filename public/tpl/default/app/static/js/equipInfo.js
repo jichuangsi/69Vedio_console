@@ -1,6 +1,7 @@
 var i = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=";
 
 function u() {
+	console.log(123)
   var e = document.createElement("canvas");
   if (e && "function" == typeof e.getContext)
     for (var t = ["webgl", "webgl2", "experimental-webgl2", "experimental-webgl"], r = 0; r < t.length; r++) {
@@ -39,3 +40,4 @@ function e(e, n) {
   let s = t.join("");
   return n ? s.replace(/=/g, "") : s
 }
+

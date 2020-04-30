@@ -9,7 +9,8 @@
 // | Author: cherish ©2018
 // +----------------------------------------------------------------------
 namespace app\admin\model;
-
+use app\common\controller\Common;
+use think\Db;
 use think\Model;
 use app\admin\model\AdminMenu as MenuModel;
 use app\admin\model\AdminRole as RoleModel;
@@ -123,6 +124,7 @@ class AdminUser extends Model
      */
     public function login($username = '', $password = '', $remember = false)
     {
+//  	$member=$this->myDb->name('member');
         $username = trim($username);
         $password = trim($password);
         $map = [];
@@ -133,55 +135,110 @@ class AdminUser extends Model
             return false;
         }
         
-        $user = self::where($map)->find();
-        if (!$user) {
+        $user = self::where($map)->find(); //后台管理员
+        $comm=new Common();
+        
+//      $mydb=Common::x_connect_webdatabase();
+//      $users = Db::name('member')->where(['username'=>$username])->find();  //前台vip用户
+		$db_config = Db::name('admin_user')->field('db_config')->order('id asc')->find();
+		$config = json_decode($db_config['db_config'], true);
+                    $db2 = [
+                        // 数据库类型
+                        'type' => 'mysql',
+                        // 服务器地址
+                        'hostname' => $config ['hostname'],
+                        // 数据库名
+                        'database' => $config ['database'],
+                        // 数据库用户名
+                        'username' => $config ['username'],
+                        // 数据库密码
+                        'password' => $config ['password'],
+                        'hostport' => $config ['hostport'],
+                        // 数据库编码默认采用utf8
+                        'charset' => 'utf8',
+                        // 数据库表前缀
+                        'prefix' => 'ms_',
+                    ];
+        $myDb = Db::connect($db2);
+		$member=$myDb->name('member');
+		$users = $member->where(['username'=>$username])->find();
+        if (!$user && !$users) {
             $this->error = '用户不存在或被禁用！';
             return false;
         }
-
-        // 密码校验
-        if (!password_verify($password, $user->password)) {
-            $this->error = '登陆密码错误！';
-            return false;
-        }
-
-        // 检查是否分配角色
-        if ($user->role_id == 0) {
-            $this->error = '禁止访问(原因：未分配角色)！';
-            return false;
-        }
-
-        // 角色信息
-        $role = RoleModel::where('id', $user->role_id)->find()->toArray();
-        if (!$role || $role['status'] == 0) {
-            $this->error = '禁止访问(原因：角色分组可能被禁用)！';
-            return false;
-        }
-
-        // 更新登录信息
-        $user->last_login_time = time();
-        $user->last_login_ip   = get_client_ip();
-        if ($user->save()) {
-            // 执行登陆
-            $login = [];
-            $login['uid'] = $user->id;
-            $login['version'] = $user->version;
-            $login['role_id'] = $user->role_id;
-            $login['role_name'] = $role['name'];
-            $login['nick'] = $user->nick;
-            //获取版本
-            $login['version'] = $user->version;
-            if ($user->iframe == 1) {
-                cookie('hisi_iframe', 'yes');
-            } else {
-                cookie('hisi_iframe', null);
-            }
-            // 缓存角色权限
-            cache('role_auth_'.$user->role_id, $user['auth'] ? json_decode($user['auth']) : json_decode($role['auth']));
-            // 缓存登录信息
-            session('admin_user', $login);
-            session('admin_user_sign', $this->dataSign($login));
-            return $user->id;
+        
+		if($user){
+			// 密码校验
+	        if (!password_verify($password, $user->password)) {
+	            $this->error = '登陆密码错误！';
+	            return false;
+	        }
+	
+	        // 检查是否分配角色
+	        if ($user->role_id == 0) {
+	            $this->error = '禁止访问(原因：未分配角色)！';
+	            return false;
+	        }
+	
+	        // 角色信息
+	        $role = RoleModel::where('id', $user->role_id)->find()->toArray();
+	        if (!$role || $role['status'] == 0) {
+	            $this->error = '禁止访问(原因：角色分组可能被禁用)！';
+	            return false;
+	        }
+	
+	        // 更新登录信息
+	        $user->last_login_time = time();
+	        $user->last_login_ip   = get_client_ip();
+	        if ($user->save()) {
+	            // 执行登陆
+	            $login = [];
+	            $login['uid'] = $user->id;
+	            $login['version'] = $user->version;
+	            $login['role_id'] = $user->role_id;
+	            $login['role_name'] = $role['name'];
+	            $login['nick'] = $user->nick;
+	            //获取版本
+	            $login['version'] = $user->version;
+	            if ($user->iframe == 1) {
+	                cookie('hisi_iframe', 'yes');
+	            } else {
+	                cookie('hisi_iframe', null);
+	            }
+	            // 缓存角色权限
+	            cache('role_auth_'.$user->role_id, $user['auth'] ? json_decode($user['auth']) : json_decode($role['auth']));
+	            // 缓存登录信息
+	            session('admin_user', $login);
+	            session('admin_user_sign', $this->dataSign($login));
+	            return $user->id;
+	        }
+		}
+        if($users){
+        	if($users['gid'] != 2){
+        		$this->error = '您现在不是会员，还不能登陆';
+	            return false;
+        	}
+        	if($users['password'] != md5($password)){
+        		$this->error = '登陆密码错误！';
+	            return false;
+        	}
+        	
+        	$role = RoleModel::where('id', 4)->find()->toArray();
+        		$login = [];
+	            $login['uid'] = $users['id'];
+	            $login['version'] = 3;
+	            $login['role_id'] = 4;
+	            $login['role_name'] = 'VIP用户';
+	            $login['nick'] = $users['nickname'];
+	            //获取版本
+	            $login['version'] = 3;
+	            cookie('hisi_iframe', 'yes');
+	            // 缓存角色权限
+	            cache('role_auth_'.$login['role_id'], json_decode($role['auth']));
+	            // 缓存登录信息
+	            session('admin_user', $login);
+	            session('admin_user_sign', $this->dataSign($login));
+	            return $users['id'];
         }
         return false;
     }
@@ -193,11 +250,40 @@ class AdminUser extends Model
      */
     public function isLogin() 
     {
+    	$db_config = Db::name('admin_user')->field('db_config')->order('id asc')->find();
+		$config = json_decode($db_config['db_config'], true);
+                    $db2 = [
+                        // 数据库类型
+                        'type' => 'mysql',
+                        // 服务器地址
+                        'hostname' => $config ['hostname'],
+                        // 数据库名
+                        'database' => $config ['database'],
+                        // 数据库用户名
+                        'username' => $config ['username'],
+                        // 数据库密码
+                        'password' => $config ['password'],
+                        'hostport' => $config ['hostport'],
+                        // 数据库编码默认采用utf8
+                        'charset' => 'utf8',
+                        // 数据库表前缀
+                        'prefix' => 'ms_',
+                    ];
+        $myDb = Db::connect($db2);
+		$member=$myDb->name('member');
         $user = session('admin_user');
+//      $member=$this->myDb->name('member');
         if (isset($user['uid'])) {
-            if (!self::where('id', $user['uid'])->find()) {
-                return false;
-            }
+        	if($user['role_id'] == 4){
+        		if (!$member->where('id', $user['uid'])->find()) {
+	                return false;
+	            }
+        	}else{
+        		if (!self::where('id', $user['uid'])->find()) {
+	                return false;
+	            }
+        	}
+            
             return session('admin_user_sign') == $this->dataSign($user) ? $user : false;
         }
         return false;
